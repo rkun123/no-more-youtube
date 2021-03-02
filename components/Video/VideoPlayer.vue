@@ -5,6 +5,7 @@
       ref="yt"
       video-id="3Isbd9b7tvg"
       width="100%"
+      :height="height"
       @ready="ready"
       @playing="play"
       @paused="paused"
@@ -24,6 +25,7 @@ import Vue from 'vue'
 export default Vue.extend({
   data () {
     return {
+      height: 400
     }
   },
   computed: {
@@ -32,6 +34,10 @@ export default Vue.extend({
       console.log(this.$refs.yt)
       return this.$refs.yt.player
     }
+  },
+  mounted () {
+    this.height = window.innerWidth * (9 / 16)
+    window.addEventListener('resize', this.handleResize)
   },
   methods: {
     ready () {
@@ -51,6 +57,14 @@ export default Vue.extend({
     },
     playing () {
       this.player.playVideo()
+    },
+    handleResize () {
+      // resizeのたびにこいつが発火するので、ここでやりたいことをやる
+      if (window.innerWidth * (9 / 16) < 650) {
+        this.height = window.innerWidth * (9 / 16)
+      } else {
+        this.height = 650
+      }
     }
   }
 })
