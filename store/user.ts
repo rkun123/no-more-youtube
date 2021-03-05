@@ -1,10 +1,10 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
-import { $axios } from '~/utils/api'
+// import { $axios } from '~/utils/api'
 import firebase from '~/plugins/Auth/firebase.ts'
 
 type User = {
-  userName?: string,
-  userIcon?: string,
+  userName?: string | null,
+  userIcon?: string | null,
   idToken?: string,
   acceccToken?: string
 }
@@ -15,67 +15,51 @@ type User = {
   namespaced: true
 })
 export default class Users extends VuexModule {
-  private users: User[] = [];
+  private user: User ={};
 
-  public get getusers () {
-    return this.users
+  public get getuser () {
+    return this.user
   }
 
-  // public get getuser () {
-  //   return (id: Number) => this.users.find((user) => user.id === id)
-  // }
-
-  public get getuserCount () {
-    return this.users.length
-  }
-
-  @Mutation
-  private add (user: User) {
-    this.users.push(user)
-  }
-
-  // @Mutation
-  // private remove (id: Number) {
-  //   this.users = this.users.filter((user) => user.id !== id)
-  // }
-
-  @Mutation set (users: User[]) {
-    this.users = users
-  }
-
-  @Action({ rawError: true })
-  public async fetchusers () {
-    const { data } = await $axios.get<User[]>("/api/users");
-    this.set(data)
-  }
-
-  @Action({ rawError: true })
-  public async createuser (payload: User) {
-    const { data } = await $axios.post<User>('/api/user', payload)
-    this.add(data)
+  @Mutation set (data: User) {
+    this.user = data
   }
 
   @Action({ rawError: true })
   login () {
+    // eslint-disable-next-line no-console
     console.log('login action')
     const provider = new firebase.auth.GoogleAuthProvider()
     firebase
       .auth()
       .signInWithPopup(provider)
-      .then(function (result) {
-        const credential = result.credential
-        console.log(credential)
-        console.log(result.user)
+      .then((result) => {
+        const credential = result.credential as firebase.auth.OAuthCredential
+        const user = result.user
+        const userdata: User = {
+          userName: user?.displayName,
+          userIcon: user?.photoURL,
+          idToken: credential.idToken,
+          acceccToken: credential.accessToken
+        }
+        this.set(userdata)
       })
       .catch(function (error) {
         const errorCode = error.code
         console.log('error : ' + errorCode)
       })
   }
-
-  // @Action({ rawError: true })
-  // async deleteuser (id: Number) {
-  //   await $axios.delete(`/api/user/${id}`)
-  //   this.remove(id)
-  // }
+// コンポーネントでの使い方
+// import { UserStore } from '~/store'
+// export default Vue.extend({
+//   methods: {
+//     login () {
+//       UserStore.login()
+//     },
+//     getData () {
+//       const user = UserStore.getuser
+//       console.log(user)
+//     }
+//   }
+// })
 }
