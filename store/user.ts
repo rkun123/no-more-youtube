@@ -6,7 +6,7 @@ type User = {
   userName?: string | null,
   userIcon?: string | null,
   idToken?: string,
-  acceccToken?: string
+  accessToken?: string
 }
 
 @Module({
@@ -40,7 +40,7 @@ export default class Users extends VuexModule {
           userName: user?.displayName,
           userIcon: user?.photoURL,
           idToken: credential.idToken,
-          acceccToken: credential.accessToken
+          accessToken: credential.accessToken
         }
         this.set(userdata)
       })
