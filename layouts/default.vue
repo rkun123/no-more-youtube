@@ -4,6 +4,17 @@
   </div>
 </template>
 
+<script lang="ts">
+import Vue from 'vue'
+import { UserStore } from '~/store'
+
+export default Vue.extend({
+  created () {
+    UserStore.auth()
+  }
+})
+</script>
+
 <style>
 html {
   font-family:
