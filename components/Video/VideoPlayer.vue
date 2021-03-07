@@ -10,10 +10,19 @@
       @ready="ready"
       @playing="play"
       @paused="paused"
+      @ended="ended"
     />
-    <div class="wrap" v-show="wrap">
-      <fa :icon="['fab', 'youtube']" @click="playing" class="play-button" />
+    <div v-show="wrap" class="wrap" :style="heightSet">
+      <fa class="play-button" :icon="['fab', 'youtube']" @click="playing" />
     </div>
+    <input
+      v-model="range"
+      type="range"
+      class="seekbar"
+      @mouseup="setTime"
+      @mousedown="setDrag"
+      @mouseleave="setTime"
+    >
   </div>
 </template>
 
@@ -23,9 +32,13 @@ import Vue from 'vue'
 interface videoInfo {
   height: number
   wrap: boolean
+  range: number
+  length: number
+  drag: boolean
   playerVars:{
     fs: number
     rel: number
+    controls: number
   }
 }
 
@@ -40,9 +53,13 @@ export default Vue.extend({
     return {
       height: 400,
       wrap: true,
+      range: 0,
+      length: 0,
+      drag: false,
       playerVars: {
         fs: 0, // フルスクリーンの禁止
-        rel: 0 // 関連動画を投稿者のものだけにする
+        rel: 0, // 関連動画を投稿者のものだけにする
+        controls: 0
       }
     }
   },
@@ -50,6 +67,12 @@ export default Vue.extend({
     player () {
       // @ts-ignore
       return this.$refs.yt.player
+    },
+    heightSet () {
+      return {
+        // @ts-ignore
+        '--height': String(this.height) + 'px'
+      }
     }
   },
   mounted () {
@@ -57,21 +80,41 @@ export default Vue.extend({
     this.handleResize()
     // @ts-ignore
     window.addEventListener('resize', this.handleResize)
+    // eslint-disable-next-line no-implied-eval
+    setInterval(() => {
+      // @ts-ignore
+      this.seek()
+    }, 500)
   },
   methods: {
     ready () {
       // @ts-ignore
-      console.log(this.player)
+      this.player.getDuration().then((result) => {
+        // @ts-ignore
+        this.length = result
+      })
+    },
+    seek () {
+      // @ts-ignore
+      if (!this.drag) {
+        // @ts-ignore
+        this.player.getCurrentTime().then((result) => {
+          // @ts-ignore
+          this.range = result / this.length * 100.0
+        })
+      }
     },
     play () {
       // @ts-ignore
       this.wrap = false
-      console.log('play')
     },
     paused () {
       // @ts-ignore
       this.wrap = true
-      console.log('pause')
+    },
+    ended () {
+      // @ts-ignore
+      this.wrap = true
     },
     pause () {
       // @ts-ignore
@@ -94,6 +137,18 @@ export default Vue.extend({
         // @ts-ignore
         this.height = 650
       }
+    },
+    setTime () {
+      // @ts-ignore
+      const now = (this.range * this.length) / 100.0
+      // @ts-ignore
+      this.player.seekTo(now, true)
+      // @ts-ignore
+      this.drag = false
+    },
+    setDrag () {
+      // @ts-ignore
+      this.drag = true
     }
   }
 })
@@ -102,12 +157,13 @@ export default Vue.extend({
 <style scoped>
 .player {
   position: relative;
+  text-align: center;
 }
 .wrap{
   position: absolute;
   top: 0px;
   width:100%;
-  height: 100%;
+  height: var(--height);
   background-color: #050000;
 }
 .play-button{
@@ -121,5 +177,9 @@ export default Vue.extend({
 }
 .play-button:hover {
   font-size: 110px;
+}
+.seekbar{
+  width: 100%;
+  max-width: 1156px;
 }
 </style>
