@@ -1,14 +1,24 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
-// import { $axios } from '~/utils/api'
+import { $axios } from '~/utils/api'
 import firebase from '~/plugins/Auth/firebase.ts'
 
 type User = {
+  uid?: string | null,
   userName?: string | null,
   userIcon?: string | null,
   userEmail?: string | null,
   idToken?: string,
   accessToken?: string
 }
+type PostData = {
+  uid?: String | null,
+  // eslint-disable-next-line camelcase
+  google_access_token?: String | null,
+  // eslint-disable-next-line camelcase
+  id_token?: String | null
+}
+
+const baseUrl = process.env.BASE_URL
 
 @Module({
   name: 'user',
@@ -39,6 +49,7 @@ export default class Users extends VuexModule {
         const credential = result.credential as firebase.auth.OAuthCredential
         const user = result.user
         const userdata: User = {
+          uid: user?.uid,
           userName: user?.displayName,
           userIcon: user?.photoURL,
           userEmail: user?.email,
@@ -46,11 +57,28 @@ export default class Users extends VuexModule {
           accessToken: credential.accessToken
         }
         this.set(userdata)
+        this.postUser()
       })
       .catch(function (error) {
         const errorCode = error.code
+        // eslint-disable-next-line no-console
         console.log('error : ' + errorCode)
       })
+  }
+
+  @Action({ rawError: true })
+  async postUser () {
+    $axios.setHeader('Authorization', this.user.idToken)
+    const payload: PostData = {
+      uid: this.user.uid,
+      google_access_token: this.user.accessToken,
+      id_token: this.user.idToken
+    }
+    await $axios.post(baseUrl + '/', payload).then((response) => {
+      console.log(response)
+    }).catch(() => {
+      alert('エラーが発生しました。')
+    })
   }
 
   // eslint-disable-next-line require-await

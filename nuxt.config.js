@@ -6,7 +6,8 @@ const {
   STORAGE_BUCKET,
   MESSAGING_ID,
   APP_ID,
-  MEASUREMENT_ID
+  MEASUREMENT_ID,
+  BASE_URL
 } = process.env
 
 export default {
@@ -66,6 +67,7 @@ export default {
     STORAGE_BUCKET,
     MESSAGING_ID,
     APP_ID,
-    MEASUREMENT_ID
+    MEASUREMENT_ID,
+    BASE_URL
   }
 }
