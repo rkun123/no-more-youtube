@@ -44,18 +44,20 @@ export default class Users extends VuexModule {
       .auth()
       .signInWithPopup(provider)
       .then((result) => {
-        const credential = result.credential as firebase.auth.OAuthCredential
-        const user = result.user
-        const userdata: User = {
-          uid: user?.uid,
-          userName: user?.displayName,
-          userIcon: user?.photoURL,
-          userEmail: user?.email,
-          idToken: credential.idToken,
-          accessToken: credential.accessToken
-        }
-        this.set(userdata)
-        this.postUser()
+        firebase.auth().currentUser?.getIdToken(true).then((token) => {
+          const credential = result.credential as firebase.auth.OAuthCredential
+          const user = result.user
+          const userdata: User = {
+            uid: user?.uid,
+            userName: user?.displayName,
+            userIcon: user?.photoURL,
+            userEmail: user?.email,
+            idToken: token,
+            accessToken: credential.accessToken
+          }
+          this.set(userdata)
+          this.postUser()
+        })
       })
       .catch(function (error) {
         const errorCode = error.code
@@ -69,7 +71,7 @@ export default class Users extends VuexModule {
     $axios.setHeader('Authorization', 'Bearer ' + this.user.idToken)
     const payload: PostData = {
       uid: this.user.uid,
-      google_access_token: this.user.accessToken,
+      google_access_token: this.user.accessToken
     }
     await $axios.post(baseUrl + '/api/v1/credentials', payload).then((response) => {
       console.log(response)
@@ -83,18 +85,22 @@ export default class Users extends VuexModule {
   async auth () {
     return new Promise(() => {
       firebase.auth().onIdTokenChanged((result) => {
-        if(result === null) this.login()
-        else result?.getIdToken(true).then((token) => {
-          const user = result
-          const userdata: User = {
-            userName: user?.displayName,
-            userIcon: user?.photoURL,
-            userEmail: user?.email,
-            idToken: token,
-            accessToken: ''
-          }
-          this.set(userdata)
-        })
+        if (result === null) {
+          this.login()
+        } else {
+          result?.getIdToken(true).then((token) => {
+            const user = result
+            const userdata: User = {
+              uid: user?.uid,
+              userName: user?.displayName,
+              userIcon: user?.photoURL,
+              userEmail: user?.email,
+              idToken: token,
+              accessToken: ''
+            }
+            this.set(userdata)
+          })
+        }
       })
     })
   }
