@@ -14,8 +14,6 @@ type PostData = {
   uid?: String | null,
   // eslint-disable-next-line camelcase
   google_access_token?: String | null,
-  // eslint-disable-next-line camelcase
-  id_token?: String | null
 }
 
 const baseUrl = process.env.BASE_URL
@@ -68,13 +66,12 @@ export default class Users extends VuexModule {
 
   @Action({ rawError: true })
   async postUser () {
-    $axios.setHeader('Authorization', this.user.idToken)
+    $axios.setHeader('Authorization', 'Bearer ' + this.user.idToken)
     const payload: PostData = {
       uid: this.user.uid,
       google_access_token: this.user.accessToken,
-      id_token: this.user.idToken
     }
-    await $axios.post(baseUrl + '/', payload).then((response) => {
+    await $axios.post(baseUrl + '/api/v1/credentials', payload).then((response) => {
       console.log(response)
     }).catch(() => {
       alert('エラーが発生しました。')
@@ -86,7 +83,8 @@ export default class Users extends VuexModule {
   async auth () {
     return new Promise(() => {
       firebase.auth().onIdTokenChanged((result) => {
-        result?.getIdToken(true).then((token) => {
+        if(result === null) this.login()
+        else result?.getIdToken(true).then((token) => {
           const user = result
           const userdata: User = {
             userName: user?.displayName,
