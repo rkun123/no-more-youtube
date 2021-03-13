@@ -46,7 +46,7 @@ export default Vue.extend({
   props: {
     videoId: {
       type: String,
-      default: '3Isbd9b7tvg'
+      default: '7O1WGScOKe4'
     }
   },
   data (): videoInfo {
@@ -124,9 +124,9 @@ export default Vue.extend({
     },
     playing () {
       // @ts-ignore
-      this.wrap = false
-      // @ts-ignore
       this.player.playVideo()
+      // @ts-ignore
+      this.wrap = false
     },
     handleResize () {
       // resizeのたびにこいつが発火するので、ここでやりたいことをやる
