@@ -1,7 +1,9 @@
 <template>
   <div class="video-card" @click="watch(videos.videoId)">
     <img :src="videos.videoThumbnail">
-    <div class="title">{{ videos.videoTitle }}</div>
+    <div class="title">
+      {{ videos.videoTitle }}
+    </div>
   </div>
 </template>
 

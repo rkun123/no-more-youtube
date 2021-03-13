@@ -7,7 +7,8 @@ const {
   MESSAGING_ID,
   APP_ID,
   MEASUREMENT_ID,
-  BASE_URL
+  BASE_URL,
+  YOUTUBE_API_KEY
 } = process.env
 
 export default {
@@ -71,6 +72,7 @@ export default {
     MESSAGING_ID,
     APP_ID,
     MEASUREMENT_ID,
-    BASE_URL
+    BASE_URL,
+    YOUTUBE_API_KEY
   }
 }
