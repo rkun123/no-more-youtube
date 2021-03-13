@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-for="channel in setList" :key="channel.num">
-      <main-page :list="channel" />
+    <div v-for="channel in setList" :key="channel.id">
+      <main-page :list="channel" @input="check(channel,$event)" />
     </div>
   </div>
 </template>
@@ -14,6 +14,7 @@ interface Channel {
   channelId?: string | null,
   title?: string | null,
   channelThumbnail?: string | null,
+  favorite: boolean,
   videos: any
 }
 
@@ -26,12 +27,13 @@ interface Video {
 export default Vue.extend({
   components: { MainPage },
   computed: {
-    setList () {
+    setList () { // ここでAPIから受け取ったデータを処理する。
       const list = []
       const channel: Channel = {
         channelId: 'UCvzGlP9oQwU',
         title: 'Subaru Ch. 大空スバル',
         channelThumbnail: 'https://yt3.ggpht.com/ytc/AAUvwniCgko15I_x5bYWm0G2vnf5hZqD5hLOtLEDw0Na=s176-c-k-c0x00ffffff-no-rj',
+        favorite: false,
         videos: []
       }
       const video: Video = {
@@ -51,6 +53,14 @@ export default Vue.extend({
       list.push(channel)
       list.push(channel)
       return list
+    }
+  },
+  methods: {
+    check (channel: Channel, event: boolean) {
+      // ここにfavoriteの変更した時のAPI通信を行う
+      console.log(channel)
+      channel.favorite = event
+      console.log(channel)
     }
   }
 })
