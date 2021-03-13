@@ -1,3 +1,15 @@
+require('dotenv').config()
+const {
+  API_KEY,
+  AUTH_DOMAIN,
+  PROJECT_ID,
+  STORAGE_BUCKET,
+  MESSAGING_ID,
+  APP_ID,
+  MEASUREMENT_ID,
+  BASE_URL
+} = process.env
+
 export default {
   // Target: https://go.nuxtjs.dev/config-target
   target: 'static',
@@ -25,6 +37,7 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    '~/plugins/axios-accessor',
     { src: '@/plugins/youtube', ssr: false },
     '@/plugins/fontawesome'
   ],
@@ -49,5 +62,15 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+  },
+  env: {
+    API_KEY,
+    AUTH_DOMAIN,
+    PROJECT_ID,
+    STORAGE_BUCKET,
+    MESSAGING_ID,
+    APP_ID,
+    MEASUREMENT_ID,
+    BASE_URL
   }
 }
