@@ -11,9 +11,10 @@ import Vue from 'vue'
 import MainPage from '~/components/Channel/MainPage.vue'
 
 interface Channel {
-  channelId?: string | null,
-  title?: string | null,
-  channelThumbnail?: string | null,
+  // eslint-disable-next-line camelcase
+  youtube_channel_id?: string | null,
+  name?: string | null,
+  avatar?: string | null,
   favorite: boolean,
   videos: any
 }
@@ -30,9 +31,9 @@ export default Vue.extend({
     setList () { // ここでAPIから受け取ったデータを処理する。
       const list = []
       const channel: Channel = {
-        channelId: 'UCvzGlP9oQwU',
-        title: 'Subaru Ch. 大空スバル',
-        channelThumbnail: 'https://yt3.ggpht.com/ytc/AAUvwniCgko15I_x5bYWm0G2vnf5hZqD5hLOtLEDw0Na=s176-c-k-c0x00ffffff-no-rj',
+        youtube_channel_id: 'UCvzGlP9oQwU',
+        name: 'Subaru Ch. 大空スバル',
+        avatar: 'https://yt3.ggpht.com/ytc/AAUvwniCgko15I_x5bYWm0G2vnf5hZqD5hLOtLEDw0Na=s176-c-k-c0x00ffffff-no-rj',
         favorite: false,
         videos: []
       }

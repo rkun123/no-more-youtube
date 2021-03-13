@@ -1,7 +1,7 @@
 <template>
   <div class="video-card" @click="watch(videos.videoId)">
     <img :src="videos.videoThumbnail">
-    <p>{{ videos.videoTitle }}</p>
+    <div class="title">{{ videos.videoTitle }}</div>
   </div>
 </template>
 
@@ -32,15 +32,16 @@ export default Vue.extend({
 <style scoped>
 .video-card {
   display: inline;
-  margin: 5px;
   cursor: pointer;
 }
 .video-card img {
   height: 118px;
   width: 210px;
 }
-.video-card p {
+.video-card .title {
   width: 210px;
   white-space:normal;
+  margin: 0px;
+  padding: 0;
 }
 </style>

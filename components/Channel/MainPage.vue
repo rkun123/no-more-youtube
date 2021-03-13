@@ -1,14 +1,16 @@
 <template>
   <div>
     <div class="channel">
-      <img class="icon" :src="list.channelThumbnail">
-      <p>{{ list.title }}</p>
+      <img class="icon" :src="list.avatar">
+      <p>{{ list.name }}</p>
       <fa v-if="!list.favorite" class="heart not-fav" :icon="['far', 'heart']" @click="Favo" />
       <fa v-if="list.favorite" class="heart fav" :icon="['far', 'heart']" @click="disFavo" />
     </div>
     <div class="videos">
       <div v-for="video in list.videos" :key="video.num">
-        <video-card :videos="video" />
+        <div class="card">
+          <video-card :videos="video" />
+        </div>
       </div>
     </div>
   </div>
@@ -19,9 +21,10 @@ import Vue, { PropType } from 'vue'
 import VideoCard from './VideoCard.vue'
 
 interface Channel {
-  channelId?: string | null,
-  title?: string | null,
-  channelThumbnail?: string | null,
+  // eslint-disable-next-line camelcase
+  youtube_channel_id?: string | null,
+  name?: string | null,
+  avatar?: string | null,
   favorite: boolean,
   videos: any
 }
@@ -82,5 +85,8 @@ export default Vue.extend({
   white-space: nowrap;
   padding: 5px;
   display: flex;
+}
+.videos .card{
+  margin: 5px;
 }
 </style>
