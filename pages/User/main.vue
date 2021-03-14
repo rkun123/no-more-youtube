@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-for="channel in getChannels" :key="channel.youtube_channel_id">
-      <main-page :list="channel" @input="check(channel.youtube_channel_id,$event)" />
+    <div v-for="channel in getChannels" :key="channel.youtubeChannelId">
+      <main-page :list="channel" @input="check(channel.youtubeChannelId,$event)" />
     </div>
   </div>
 </template>

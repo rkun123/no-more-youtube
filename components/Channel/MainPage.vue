@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="channel" @click="moveChannel(list.youtube_channel_id)">
+    <div class="channel" @click="moveChannel(list.youtubeChannelId)">
       <img class="icon" :src="list.avatar">
       <p>{{ list.name }}</p>
       <fa v-if="!list.favorite" class="heart not-fav" :icon="['far', 'heart']" @click="Favo" />
@@ -23,7 +23,7 @@ import { ChannelsStore } from '~/store'
 
 interface Channel {
   // eslint-disable-next-line camelcase
-  youtube_channel_id?: string | null,
+  youtubeChannelId?: string | null,
   name?: string | null,
   avatar?: string | null,
   favorite: boolean,
@@ -40,7 +40,7 @@ export default Vue.extend({
   },
   created () {
     console.log('videoset')
-    ChannelsStore.setVideo(String(this.list.youtube_channel_id))
+    ChannelsStore.setVideo(String(this.list.youtubeChannelId))
   },
   methods: {
     Favo () {

@@ -24,8 +24,8 @@ export default Vue.extend({
       return VideosStore.getVideos
     }
   },
-  created () {
-    VideosStore.setVideos(this.$route.params.id)
+  async created () {
+    await VideosStore.setVideos(this.$route.params.id)
   }
 })
 </script>

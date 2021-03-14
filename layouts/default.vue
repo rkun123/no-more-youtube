@@ -9,8 +9,8 @@ import Vue from 'vue'
 import { UserStore } from '~/store'
 
 export default Vue.extend({
-  created () {
-    UserStore.auth()
+  async created () {
+    await UserStore.auth()
   }
 })
 </script>

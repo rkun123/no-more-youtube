@@ -1,7 +1,7 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
+import { UserStore } from '../store'
 import { $axios } from '~/utils/api'
 import { db } from '~/plugins/Auth/firebase'
-import { UserStore } from '../store'
 
 export type Channel = {
   youtubeChannelId?: string | null,
@@ -18,7 +18,6 @@ type Video = {
 }
 
 type favoPayload = {
-  // eslint-disable-next-line camelcase
   youtubeChannelId : string,
   favorite: boolean
 }
@@ -36,7 +35,7 @@ export default class Channels extends VuexModule {
   }
 
   @Mutation
-  private setChannels( channels: Channel[]) {
+  private setChannels (channels: Channel[]) {
     this.channels = channels
   }
 
@@ -65,7 +64,7 @@ export default class Channels extends VuexModule {
     const target = this.channels.find((search) => {
       return search.youtubeChannelId === key.youtubeChannelId
     })
-    if(target === undefined) return
+    if (target === undefined) { return }
     target.favorite = key.favorite
     // ここにfavoriteのデータベース通信を記述
   }
@@ -110,15 +109,16 @@ export default class Channels extends VuexModule {
       })
   }
 
-  @Action({ rawError: true})
-  async fetchAndApplyFavoToAllChannels() {
+  @Action({ rawError: true })
+  async fetchAndApplyFavoToAllChannels () {
     const me = UserStore.getuser
-    if(!me.uid) return
+    if (!me.uid) { return }
     const subscriptionCollections = await db
       .collection('users')
       .doc(me.uid!)
       .collection('subscriptions')
 
+    // eslint-disable-next-line arrow-parens
     const newChannels = await Promise.all(this.channels.map(async channel => {
       console.info(channel)
       const subscriptionDoc = await subscriptionCollections.doc(channel.youtubeChannelId!).get()
@@ -129,19 +129,21 @@ export default class Channels extends VuexModule {
       }
     }))
     console.info('Channels', newChannels)
+    if (newChannels === undefined) { return }
     this.setChannels(newChannels)
   }
-  @Action({ rawError: true})
-  async postSubscribeChannels() {
+
+  @Action({ rawError: true })
+  async postSubscribeChannels () {
     const me = UserStore.getuser
-    if(!me.uid) return
+    if (!me.uid) { return }
     const subscriptionCollections = await db
       .collection('users')
       .doc(me.uid!)
       .collection('subscriptions')
 
     await this.channels.forEach(async (channel) => {
-      subscriptionCollections.doc(channel.youtubeChannelId!).set( channel)
+      subscriptionCollections.doc(channel.youtubeChannelId!).set(channel)
     })
   }
 
@@ -155,9 +157,7 @@ export default class Channels extends VuexModule {
     console.info(UserStore.getuser.accessToken)
     await $axios.setHeader(
       'Authorization',
-      'Bearer ' +
-        //'ya29.a0AfH6SMCSgchlgNftjerF56U0LfvBXuhrUqcjIY--MNdLCkD_dF4D0hT-_c6i4cXD0T-3IEaDIqV_brh50uwk7ks_OMHDNHatsfgSllX0Rbm4o7oKRgNIPQs7L_JGQ6epvu-929EZRIHviLtRKzBJIJWqSeVHSw'
-        UserStore.getuser.accessToken
+      'Bearer ' + UserStore.getuser.accessToken
     )
     const params = {
       part: 'snippet',
