@@ -6,11 +6,12 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { UserStore } from '~/store'
+import { ChannelsStore, UserStore } from '~/store'
 
 export default Vue.extend({
   async created () {
     await UserStore.auth()
+    await ChannelsStore.fetchSubscriptions()
   }
 })
 </script>

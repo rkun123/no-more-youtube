@@ -28,9 +28,6 @@ export default Vue.extend({
       return ChannelsStore.getchannels
     }
   },
-  async created () {
-    await ChannelsStore.fetchSubscriptions()
-  },
   methods: {
     check (id: string, event: boolean) {
       const payload = {

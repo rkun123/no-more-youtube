@@ -32,6 +32,10 @@ export default class Users extends VuexModule {
     return this.user
   }
 
+  public get getMyUID() {
+    return this.user.uid!
+  }
+
   @Mutation set (data: User) {
     this.user = data
   }
@@ -42,30 +46,35 @@ export default class Users extends VuexModule {
     console.log('login action')
     const provider = new firebase.auth.GoogleAuthProvider()
     provider.addScope('https://www.googleapis.com/auth/youtube.readonly')
-    firebase
-      .auth()
-      .signInWithPopup(provider)
-      .then((result) => {
-        firebase.auth().currentUser?.getIdToken(true).then((token) => {
-          const credential = result.credential as firebase.auth.OAuthCredential
-          const user = result.user
-          const userdata: User = {
-            uid: user?.uid,
-            userName: user?.displayName,
-            userIcon: user?.photoURL,
-            userEmail: user?.email,
-            idToken: token,
-            accessToken: credential.accessToken
-          }
-          this.set(userdata)
-          this.postUser()
+    return new Promise((resolve, reject) => {
+      firebase
+        .auth()
+        .signInWithPopup(provider)
+        .then((result) => {
+          firebase.auth().currentUser?.getIdToken(true).then((token) => {
+            const credential = result.credential as firebase.auth.OAuthCredential
+            const user = result.user
+            const userdata: User = {
+              uid: user?.uid,
+              userName: user?.displayName,
+              userIcon: user?.photoURL,
+              userEmail: user?.email,
+              idToken: token,
+              accessToken: credential.accessToken
+            }
+            this.set(userdata)
+            this.postUser().then(() => {
+              resolve(null)
+            })
+          })
         })
-      })
-      .catch(function (error) {
-        const errorCode = error.code
-        // eslint-disable-next-line no-console
-        console.log('error : ' + errorCode)
-      })
+        .catch(function (error) {
+          const errorCode = error.code
+          // eslint-disable-next-line no-console
+          console.log('error : ' + errorCode)
+          reject(error)
+        })
+    })
   }
 
   @Action({ rawError: true })
@@ -86,10 +95,12 @@ export default class Users extends VuexModule {
   // eslint-disable-next-line require-await
   @Action({ rawError: true })
   async auth () {
-    return new Promise(() => {
+    return new Promise((resolve, reject) => {
       firebase.auth().onIdTokenChanged((result) => {
         if (result === null) {
-          this.login()
+          this.login().then(() => {
+            resolve(null)
+          })
         } else {
           result?.getIdToken(true).then((token) => {
             const user = result
@@ -101,7 +112,9 @@ export default class Users extends VuexModule {
               idToken: token,
               accessToken: ''
             }
-            this.fetchUser(user?.uid)
+            this.fetchUser(user?.uid).then(() => {
+              resolve(null)
+            })
             ChannelsStore.fetchSubscriptions()
           })
         }

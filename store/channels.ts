@@ -2,6 +2,7 @@ import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import { UserStore } from '../store'
 import { $axios } from '~/utils/api'
 import { db } from '~/plugins/Auth/firebase'
+import firebase from 'firebase'
 
 export type Channel = {
   youtubeChannelId?: string | null,
@@ -22,6 +23,15 @@ type favoPayload = {
   favorite: boolean
 }
 
+async function getSubscriptionCollection(): Promise<firebase.firestore.CollectionReference<firebase.firestore.DocumentData> | null> {
+  const me = UserStore.getuser
+  if(!me.uid) return null
+  return await db
+    .collection('users')
+    .doc(me.uid!)
+    .collection('subscriptions')
+}
+
 @Module({
   name: 'channels',
   stateFactory: true,
@@ -33,6 +43,7 @@ export default class Channels extends VuexModule {
   public get getchannels () {
     return this.channels
   }
+
 
   @Mutation
   private setChannels (channels: Channel[]) {
@@ -66,7 +77,6 @@ export default class Channels extends VuexModule {
     })
     if (target === undefined) { return }
     target.favorite = key.favorite
-    // ここにfavoriteのデータベース通信を記述
   }
 
   @Mutation
@@ -109,20 +119,14 @@ export default class Channels extends VuexModule {
       })
   }
 
-  @Action({ rawError: true })
-  async fetchAndApplyFavoToAllChannels () {
-    const me = UserStore.getuser
-    if (!me.uid) { return }
-    const subscriptionCollections = await db
-      .collection('users')
-      .doc(me.uid!)
-      .collection('subscriptions')
-
-    // eslint-disable-next-line arrow-parens
+  // FirestoreよりすべてのチャンネルのFavoを取得してStoreのChannelsに適用するAction
+  @Action({ rawError: true})
+  async fetchAndApplyFavoToAllChannels() {
+    const subscriptionCollection = await getSubscriptionCollection()
     const newChannels = await Promise.all(this.channels.map(async channel => {
       console.info(channel)
-      const subscriptionDoc = await subscriptionCollections.doc(channel.youtubeChannelId!).get()
-      if(!subscriptionDoc.exists) return
+      const subscriptionDoc = await subscriptionCollection!.doc(channel.youtubeChannelId!).get()
+      if(!subscriptionDoc.exists) return channel
       return {
         ...channel,
         favorite: subscriptionDoc.data()!.favorite
@@ -133,8 +137,9 @@ export default class Channels extends VuexModule {
     this.setChannels(newChannels)
   }
 
-  @Action({ rawError: true })
-  async postSubscribeChannels () {
+  // StoreのChannelsをFirestoreへ送り更新するAction
+  @Action({ rawError: true})
+  async postSubscribeChannels() {
     const me = UserStore.getuser
     if (!me.uid) { return }
     const subscriptionCollections = await db
@@ -147,13 +152,49 @@ export default class Channels extends VuexModule {
     })
   }
 
-  @Action({ rawError: true })
-  setFavo (payload: favoPayload) {
-    this.changeFavo(payload)
+  // Firestoreへ指定のChannelのFavoを送り更新するAction
+  @Action({ rawError: true})
+  async postFavoState(youtubeChannelId: string, state: boolean) {
+    (await getSubscriptionCollection())!
+      .doc(youtubeChannelId)
+      .update({
+        favorite: state
+      })
   }
 
   @Action({ rawError: true })
-  async fetchSubscriptions () {
+  async setFavo (payload: favoPayload) {
+    this.changeFavo(payload)
+    await this.postFavoState(payload.youtubeChannelId, payload.favorite)
+  }
+
+  // Firestoreに保存済の自分の登録チャンネルを取得し、Storeに格納するアクション
+  @Action({ rawError: true})
+  async fetchSubscriptions() {
+    const subscriptionCollection = await getSubscriptionCollection()
+    if(subscriptionCollection === null) {
+      console.error('Undefined subscription collection')
+      return
+    }
+    const snapshot = await subscriptionCollection.get()
+    if(snapshot.empty) {
+      // Firestoreにチャンネルの情報がないため、新たにAPIから取得
+      await this.fetchSubscriptionsFromAPI()
+      return
+    }
+    const rawChannels = snapshot.docs
+    console.debug(snapshot)
+    console.debug(snapshot.docs)
+    const channels = rawChannels.map((doc) => {
+      return doc.data() as Channel
+    })
+    this.setChannels(channels)
+    
+  }
+
+  // APIから自分の登録チャンネルを取得するし、Store、Firestoreに格納するアクション
+  @Action({ rawError: true })
+  async fetchSubscriptionsFromAPI () {
     console.info(UserStore.getuser.accessToken)
     await $axios.setHeader(
       'Authorization',
@@ -172,7 +213,9 @@ export default class Channels extends VuexModule {
         this.setList(items)
       })
       .then(() => {
+        // FirestoreからStoreのChannelsへFavoriteの情報を取得、適用する。
         this.fetchAndApplyFavoToAllChannels()
+        // Favorite情報適用済のStoreのChannelsをFirestoreへ送り、更新する。
         this.postSubscribeChannels()
       })
   }
