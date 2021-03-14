@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="channel">
+    <div class="channel" @click="moveChannel(list.youtube_channel_id)">
       <img class="icon" :src="list.avatar">
       <p>{{ list.name }}</p>
       <fa v-if="!list.favorite" class="heart not-fav" :icon="['far', 'heart']" @click="Favo" />
@@ -50,6 +50,9 @@ export default Vue.extend({
     disFavo () {
       // eslint-disable-next-line vue/no-mutating-props
       this.$emit('input', false)
+    },
+    moveChannel (id: string) {
+      this.$router.push({ path: '/channel/' + id })
     }
   }
 })
@@ -59,6 +62,7 @@ export default Vue.extend({
 .channel{
   display: flex;
   justify-items: center;
+  cursor: pointer;
 }
 .channel p {
   line-height: 50px;
