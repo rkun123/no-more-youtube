@@ -10,6 +10,12 @@ type Channel = {
   videos: any
 }
 
+type Video = {
+  videoId?: string | null,
+  videoTitle?: string | null,
+  videoThumbnail?: string | null,
+}
+
 type favoPayload = {
   // eslint-disable-next-line camelcase
   youtube_channel_id : string,
@@ -57,6 +63,46 @@ export default class Channels extends VuexModule {
     // ここにfavoriteのデータベース通信を記述
   }
 
+  @Mutation
+  private pushVideo (items: any) {
+    const target = this.channel.find((search) => {
+      return search.youtube_channel_id === items[0].snippet.channelId
+    })
+    if (target) {
+      for (let i = 0; i < items.length; i++) {
+        const data = items[i].snippet
+        const chan: Video = {
+          videoId: items[i].id.videoId,
+          videoTitle: data.title,
+          videoThumbnail: data.thumbnails.medium.url
+        }
+        const some = target.videos.some(
+          b => b.videoId === chan.videoId
+        )
+        if (!some) {
+          target.videos.push(chan)
+        }
+      }
+    }
+  }
+
+  @Action
+  // eslint-disable-next-line camelcase
+  async setVideo (youtube_channel_id: string) {
+    const params = {
+      part: 'snippet',
+      channelId: youtube_channel_id,
+      maxResults: 2, // 本番環境では50にする。
+      order: 'date'
+    }
+    await $axios
+      .get('https://www.googleapis.com/youtube/v3/search', { params })
+      .then((result) => {
+        const items = result.data.items
+        this.pushVideo(items)
+      })
+  }
+
   @Action({ rawError: true })
   setFavo (payload: favoPayload) {
     this.changeFavo(payload)
@@ -67,7 +113,7 @@ export default class Channels extends VuexModule {
     await $axios.setHeader(
       'Authorization',
       'Bearer ' +
-        'ya29.a0AfH6SMAdcXfjG_qhDrEZwZranj2LdaZBJngjofSYABD5snXhvj9bk31XrSZtxCjY4bGAUmFBt_BC6IGfkF5g2FIUx7WAg9QZjc5VcQ1-gyA3UKLih3GjZTuoRhmrxTzErT0CU3AXmBCNwYFJNXqRQVDMoGS2eg'
+        'ya29.a0AfH6SMCSgchlgNftjerF56U0LfvBXuhrUqcjIY--MNdLCkD_dF4D0hT-_c6i4cXD0T-3IEaDIqV_brh50uwk7ks_OMHDNHatsfgSllX0Rbm4o7oKRgNIPQs7L_JGQ6epvu-929EZRIHviLtRKzBJIJWqSeVHSw'
     )
     const params = {
       part: 'snippet',

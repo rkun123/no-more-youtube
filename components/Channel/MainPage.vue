@@ -19,6 +19,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 import VideoCard from './VideoCard.vue'
+import { ChannelsStore } from '~/store'
 
 interface Channel {
   // eslint-disable-next-line camelcase
@@ -36,6 +37,10 @@ export default Vue.extend({
     list: {
       type: Object as PropType<Channel>
     }
+  },
+  created () {
+    console.log('videoset')
+    ChannelsStore.setVideo(String(this.list.youtube_channel_id))
   },
   methods: {
     Favo () {
