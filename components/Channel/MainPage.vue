@@ -70,7 +70,6 @@ export default Vue.extend({
 }
 .channel .not-fav:hover {
   cursor: pointer;
-  color: #DA1725;
 }
 .channel .fav {
   color: #DA1725;

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-for="channel in setList" :key="channel.id">
-      <main-page :list="channel" @input="check(channel,$event)" />
+    <div v-for="channel in getChannels" :key="channel.youtube_channel_id">
+      <main-page :list="channel" @input="check(channel.youtube_channel_id,$event)" />
     </div>
   </div>
 </template>
@@ -9,59 +9,35 @@
 <script lang="ts">
 import Vue from 'vue'
 import MainPage from '~/components/Channel/MainPage.vue'
-
-interface Channel {
-  // eslint-disable-next-line camelcase
-  youtube_channel_id?: string | null,
-  name?: string | null,
-  avatar?: string | null,
-  favorite: boolean,
-  videos: any
-}
-
-interface Video {
-  videoId?: string | null,
-  videoTitle?: string | null,
-  videoThumbnail?: string | null,
-}
+import { ChannelsStore } from '~/store'
 
 export default Vue.extend({
   components: { MainPage },
-  computed: {
-    setList () { // ここでAPIから受け取ったデータを処理する。
-      const list = []
-      const channel: Channel = {
-        youtube_channel_id: 'UCvzGlP9oQwU',
-        name: 'Subaru Ch. 大空スバル',
-        avatar: 'https://yt3.ggpht.com/ytc/AAUvwniCgko15I_x5bYWm0G2vnf5hZqD5hLOtLEDw0Na=s176-c-k-c0x00ffffff-no-rj',
-        favorite: false,
-        videos: []
+  data () {
+    return {
+      params: {
+        part: 'snippet',
+        mine: true,
+        maxResults: 50,
+        key: ''
       }
-      const video: Video = {
-        videoId: 'TxhywIY2QHw',
-        videoTitle: '【#生スバル​】おはようスバル：FREE TALK【ホロライブ/大空スバル】',
-        videoThumbnail: 'https://pbs.twimg.com/media/EwRZFX6UYAcpiuF?format=jpg'
-      }
-      channel.videos.push(video)
-      channel.videos.push(video)
-      channel.videos.push(video)
-      channel.videos.push(video)
-      channel.videos.push(video)
-      list.push(channel)
-      list.push(channel)
-      list.push(channel)
-      list.push(channel)
-      list.push(channel)
-      list.push(channel)
-      return list
     }
   },
+  computed: {
+    getChannels () {
+      return ChannelsStore.getchannels
+    }
+  },
+  async created () {
+    await ChannelsStore.setChannels()
+  },
   methods: {
-    check (channel: Channel, event: boolean) {
-      // ここにfavoriteの変更した時のAPI通信を行う
-      console.log(channel)
-      channel.favorite = event
-      console.log(channel)
+    check (id: string, event: boolean) {
+      const payload = {
+        youtube_channel_id: id,
+        favorite: event
+      }
+      ChannelsStore.setFavo(payload)
     }
   }
 })
