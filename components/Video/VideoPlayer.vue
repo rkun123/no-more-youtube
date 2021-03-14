@@ -21,7 +21,6 @@
       class="seekbar"
       @mouseup="setTime"
       @mousedown="setDrag"
-      @mouseleave="setTime"
     >
   </div>
 </template>
