@@ -1,8 +1,6 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
-import { $axios } from '~/utils/api'
 import firebase, { db } from '~/plugins/Auth/firebase.ts'
 import { ChannelsStore } from '../store'
-import Channels from './channels'
 
 export type User = {
   uid?: string | null,
@@ -12,13 +10,6 @@ export type User = {
   idToken?: string,
   accessToken?: string
 }
-type PostData = {
-  uid?: String | null,
-  // eslint-disable-next-line camelcase
-  google_access_token?: String | null,
-}
-
-const baseUrl = process.env.BASE_URL
 
 @Module({
   name: 'user',
@@ -86,8 +77,6 @@ export default class Users extends VuexModule {
   async fetchUser(uid: string) {
     const userDoc = await db.collection('users').doc(uid).get()
     if(userDoc.exists) {
-      console.info(userDoc.data())
-      console.info(userDoc.data() as User)
       this.set(userDoc.data() as User)
     }
   }

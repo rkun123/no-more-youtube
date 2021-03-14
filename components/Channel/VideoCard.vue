@@ -9,12 +9,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-
-export interface Video {
-  videoId?: string | null,
-  videoTitle?: string | null,
-  videoThumbnail?: string | null,
-}
+import { Video } from '~/store/channels'
 
 export default Vue.extend({
   props: {

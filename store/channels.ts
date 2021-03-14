@@ -3,27 +3,28 @@ import { UserStore } from '../store'
 import { $axios } from '~/utils/api'
 import { db } from '~/plugins/Auth/firebase'
 import firebase from 'firebase'
+import { fetchVideosByChannel } from './videos'
 
 export type Channel = {
   youtubeChannelId?: string | null,
   name?: string | null,
   avatar?: string | null,
   favorite: boolean,
-  videos: any
+  videos?: Video[]
 }
 
-type Video = {
+export type Video = {
   videoId?: string | null,
   videoTitle?: string | null,
   videoThumbnail?: string | null,
 }
 
-type favoPayload = {
+export type favoPayload = {
   youtubeChannelId : string,
   favorite: boolean
 }
 
-async function getSubscriptionCollection(): Promise<firebase.firestore.CollectionReference<firebase.firestore.DocumentData> | null> {
+export async function getSubscriptionCollection(): Promise<firebase.firestore.CollectionReference<firebase.firestore.DocumentData> | null> {
   const me = UserStore.getuser
   if(!me.uid) return null
   return await db
@@ -96,7 +97,7 @@ export default class Channels extends VuexModule {
           b => b.videoId === chan.videoId
         )
         if (!some) {
-          target.videos.push(chan)
+          target.videos!.push(chan)
         }
       }
     }
@@ -111,12 +112,10 @@ export default class Channels extends VuexModule {
       maxResults: 2, // 本番環境では50にする。
       order: 'date'
     }
-    await $axios
+    const result = await $axios
       .get('https://www.googleapis.com/youtube/v3/search', { params })
-      .then((result) => {
-        const items = result.data.items
-        this.pushVideo(items)
-      })
+    const items = result.data.items
+    this.pushVideo(items)
   }
 
   // FirestoreよりすべてのチャンネルのFavoを取得してStoreのChannelsに適用するAction
@@ -124,7 +123,6 @@ export default class Channels extends VuexModule {
   async fetchAndApplyFavoToAllChannels() {
     const subscriptionCollection = await getSubscriptionCollection()
     const newChannels = await Promise.all(this.channels.map(async channel => {
-      console.info(channel)
       const subscriptionDoc = await subscriptionCollection!.doc(channel.youtubeChannelId!).get()
       if(!subscriptionDoc.exists) return channel
       return {
@@ -132,7 +130,6 @@ export default class Channels extends VuexModule {
         favorite: subscriptionDoc.data()!.favorite
       }
     }))
-    console.info('Channels', newChannels)
     if (newChannels === undefined) { return }
     this.setChannels(newChannels)
   }
@@ -142,13 +139,9 @@ export default class Channels extends VuexModule {
   async postSubscribeChannels() {
     const me = UserStore.getuser
     if (!me.uid) { return }
-    const subscriptionCollections = await db
-      .collection('users')
-      .doc(me.uid!)
-      .collection('subscriptions')
-
-    await this.channels.forEach(async (channel) => {
-      subscriptionCollections.doc(channel.youtubeChannelId!).set(channel)
+    const subscriptionCollections =  await getSubscriptionCollection()
+    this.channels.forEach((channel) => {
+      subscriptionCollections!.doc(channel.youtubeChannelId!).set(channel)
     })
   }
 
@@ -168,12 +161,13 @@ export default class Channels extends VuexModule {
     await this.postFavoState(payload.youtubeChannelId, payload.favorite)
   }
 
-  // Firestoreに保存済の自分の登録チャンネルを取得し、Storeに格納するアクション
+  // Firestoreから自分の登録チャンネルを取得し、Storeに格納するアクション
   @Action({ rawError: true})
   async fetchSubscriptions() {
     const subscriptionCollection = await getSubscriptionCollection()
     if(subscriptionCollection === null) {
       console.error('Undefined subscription collection')
+      await this.fetchSubscriptionsFromAPI()
       return
     }
     const snapshot = await subscriptionCollection.get()
@@ -183,16 +177,20 @@ export default class Channels extends VuexModule {
       return
     }
     const rawChannels = snapshot.docs
-    console.debug(snapshot)
-    console.debug(snapshot.docs)
-    const channels = rawChannels.map((doc) => {
-      return doc.data() as Channel
-    })
+    const channelsWithoutVideos = rawChannels.map((doc) => (doc.data() as Channel))
+
+    // 各Channelの動画を取得
+    const channels = await Promise.all(channelsWithoutVideos.map(async (channel) => {
+      const videos = await fetchVideosByChannel(channel.youtubeChannelId!)
+      return {
+        ...channel,
+        videos
+      }
+    }))
     this.setChannels(channels)
-    
   }
 
-  // APIから自分の登録チャンネルを取得するし、Store、Firestoreに格納するアクション
+  // APIから自分の登録チャンネルを取得し、Store、Firestoreに格納するアクション
   @Action({ rawError: true })
   async fetchSubscriptionsFromAPI () {
     console.info(UserStore.getuser.accessToken)
@@ -206,17 +204,13 @@ export default class Channels extends VuexModule {
       maxResults: 2, // 本番環境では50にする。
       key: String(process.env.YOUTUBE_API_KEY)
     }
-    $axios
+    const result = await $axios
       .get('https://www.googleapis.com/youtube/v3/subscriptions', { params })
-      .then((result) => {
-        const items = result.data.items
-        this.setList(items)
-      })
-      .then(() => {
-        // FirestoreからStoreのChannelsへFavoriteの情報を取得、適用する。
-        this.fetchAndApplyFavoToAllChannels()
-        // Favorite情報適用済のStoreのChannelsをFirestoreへ送り、更新する。
-        this.postSubscribeChannels()
-      })
+    const items = result.data.items
+    await this.setList(items)
+    // FirestoreからStoreのChannelsへFavoriteの情報を取得、適用する。
+    await this.fetchAndApplyFavoToAllChannels()
+    // Favorite情報適用済のStoreのChannelsをFirestoreへ送り、更新する。
+    await this.postSubscribeChannels()
   }
 }
