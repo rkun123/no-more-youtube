@@ -29,12 +29,12 @@ export default Vue.extend({
     }
   },
   async created () {
-    await ChannelsStore.setChannels()
+    await ChannelsStore.fetchSubscriptions()
   },
   methods: {
     check (id: string, event: boolean) {
       const payload = {
-        youtube_channel_id: id,
+        youtubeChannelId: id,
         favorite: event
       }
       ChannelsStore.setFavo(payload)

@@ -1,9 +1,10 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import { $axios } from '~/utils/api'
+import { db } from '~/plugins/Auth/firebase'
+import { UserStore } from '../store'
 
-type Channel = {
-  // eslint-disable-next-line camelcase
-  youtube_channel_id?: string | null,
+export type Channel = {
+  youtubeChannelId?: string | null,
   name?: string | null,
   avatar?: string | null,
   favorite: boolean,
@@ -18,7 +19,7 @@ type Video = {
 
 type favoPayload = {
   // eslint-disable-next-line camelcase
-  youtube_channel_id : string,
+  youtubeChannelId : string,
   favorite: boolean
 }
 
@@ -28,10 +29,15 @@ type favoPayload = {
   namespaced: true
 })
 export default class Channels extends VuexModule {
-  private channel: Channel[] = [];
+  private channels: Channel[] = [];
 
   public get getchannels () {
-    return this.channel
+    return this.channels
+  }
+
+  @Mutation
+  private setChannels( channels: Channel[]) {
+    this.channels = channels
   }
 
   @Mutation
@@ -39,34 +45,35 @@ export default class Channels extends VuexModule {
     for (let i = 0; i < items.length; i++) {
       const data = items[i].snippet
       const chan: Channel = {
-        youtube_channel_id: data.resourceId.channelId,
+        youtubeChannelId: data.resourceId.channelId,
         name: data.title,
         avatar: data.thumbnails.medium.url,
         favorite: false,
         videos: []
       }
-      const some = this.channel.some(
-        b => b.youtube_channel_id === chan.youtube_channel_id
+      const some = this.channels.some(
+        b => b.youtubeChannelId === chan.youtubeChannelId
       )
       if (!some) {
-        this.channel.push(chan)
+        this.channels.push(chan)
       }
     }
   }
 
   @Mutation
   private changeFavo (key: favoPayload) {
-    const target = this.channel.find((search) => {
-      return search.youtube_channel_id === key.youtube_channel_id
+    const target = this.channels.find((search) => {
+      return search.youtubeChannelId === key.youtubeChannelId
     })
+    if(target === undefined) return
     target.favorite = key.favorite
     // ここにfavoriteのデータベース通信を記述
   }
 
   @Mutation
   private pushVideo (items: any) {
-    const target = this.channel.find((search) => {
-      return search.youtube_channel_id === items[0].snippet.channelId
+    const target = this.channels.find((search) => {
+      return search.youtubeChannelId === items[0].snippet.channelId
     })
     if (target) {
       for (let i = 0; i < items.length; i++) {
@@ -76,7 +83,7 @@ export default class Channels extends VuexModule {
           videoTitle: data.title,
           videoThumbnail: data.thumbnails.medium.url
         }
-        const some = target.videos.some(
+        const some = (target.videos as Video[]).some(
           b => b.videoId === chan.videoId
         )
         if (!some) {
@@ -88,10 +95,10 @@ export default class Channels extends VuexModule {
 
   @Action
   // eslint-disable-next-line camelcase
-  async setVideo (youtube_channel_id: string) {
+  async setVideo (youtubeChannelId: string) {
     const params = {
       part: 'snippet',
-      channelId: youtube_channel_id,
+      channelId: youtubeChannelId,
       maxResults: 2, // 本番環境では50にする。
       order: 'date'
     }
@@ -103,17 +110,54 @@ export default class Channels extends VuexModule {
       })
   }
 
+  @Action({ rawError: true})
+  async fetchAndApplyFavoToAllChannels() {
+    const me = UserStore.getuser
+    if(!me.uid) return
+    const subscriptionCollections = await db
+      .collection('users')
+      .doc(me.uid!)
+      .collection('subscriptions')
+
+    const newChannels = await Promise.all(this.channels.map(async channel => {
+      console.info(channel)
+      const subscriptionDoc = await subscriptionCollections.doc(channel.youtubeChannelId!).get()
+      if(!subscriptionDoc.exists) return
+      return {
+        ...channel,
+        favorite: subscriptionDoc.data()!.favorite
+      }
+    }))
+    console.info('Channels', newChannels)
+    this.setChannels(newChannels)
+  }
+  @Action({ rawError: true})
+  async postSubscribeChannels() {
+    const me = UserStore.getuser
+    if(!me.uid) return
+    const subscriptionCollections = await db
+      .collection('users')
+      .doc(me.uid!)
+      .collection('subscriptions')
+
+    await this.channels.forEach(async (channel) => {
+      subscriptionCollections.doc(channel.youtubeChannelId!).set( channel)
+    })
+  }
+
   @Action({ rawError: true })
   setFavo (payload: favoPayload) {
     this.changeFavo(payload)
   }
 
   @Action({ rawError: true })
-  async setChannels () {
+  async fetchSubscriptions () {
+    console.info(UserStore.getuser.accessToken)
     await $axios.setHeader(
       'Authorization',
       'Bearer ' +
-        'ya29.a0AfH6SMCSgchlgNftjerF56U0LfvBXuhrUqcjIY--MNdLCkD_dF4D0hT-_c6i4cXD0T-3IEaDIqV_brh50uwk7ks_OMHDNHatsfgSllX0Rbm4o7oKRgNIPQs7L_JGQ6epvu-929EZRIHviLtRKzBJIJWqSeVHSw'
+        //'ya29.a0AfH6SMCSgchlgNftjerF56U0LfvBXuhrUqcjIY--MNdLCkD_dF4D0hT-_c6i4cXD0T-3IEaDIqV_brh50uwk7ks_OMHDNHatsfgSllX0Rbm4o7oKRgNIPQs7L_JGQ6epvu-929EZRIHviLtRKzBJIJWqSeVHSw'
+        UserStore.getuser.accessToken
     )
     const params = {
       part: 'snippet',
@@ -126,6 +170,10 @@ export default class Channels extends VuexModule {
       .then((result) => {
         const items = result.data.items
         this.setList(items)
+      })
+      .then(() => {
+        this.fetchAndApplyFavoToAllChannels()
+        this.postSubscribeChannels()
       })
   }
 }

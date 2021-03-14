@@ -1,8 +1,10 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import { $axios } from '~/utils/api'
-import firebase from '~/plugins/Auth/firebase.ts'
+import firebase, { db } from '~/plugins/Auth/firebase.ts'
+import { ChannelsStore } from '../store'
+import Channels from './channels'
 
-type User = {
+export type User = {
   uid?: string | null,
   userName?: string | null,
   userIcon?: string | null,
@@ -68,16 +70,17 @@ export default class Users extends VuexModule {
 
   @Action({ rawError: true })
   async postUser () {
-    $axios.setHeader('Authorization', 'Bearer ' + this.user.idToken)
-    const payload: PostData = {
-      uid: this.user.uid,
-      google_access_token: this.user.accessToken
+    await db.collection('users').doc(this.user.uid!).set(this.user)
+  }
+
+  @Action({ rawError: true})
+  async fetchUser(uid: string) {
+    const userDoc = await db.collection('users').doc(uid).get()
+    if(userDoc.exists) {
+      console.info(userDoc.data())
+      console.info(userDoc.data() as User)
+      this.set(userDoc.data() as User)
     }
-    await $axios.post(baseUrl + '/api/v1/credentials', payload).then((response) => {
-      console.log(response)
-    }).catch(() => {
-      alert('エラーが発生しました。')
-    })
   }
 
   // eslint-disable-next-line require-await
@@ -98,7 +101,8 @@ export default class Users extends VuexModule {
               idToken: token,
               accessToken: ''
             }
-            this.set(userdata)
+            this.fetchUser(user?.uid)
+            ChannelsStore.fetchSubscriptions()
           })
         }
       })

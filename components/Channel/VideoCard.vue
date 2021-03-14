@@ -10,7 +10,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 
-interface Video {
+export interface Video {
   videoId?: string | null,
   videoTitle?: string | null,
   videoThumbnail?: string | null,
