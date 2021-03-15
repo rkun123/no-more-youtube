@@ -27,6 +27,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { UserStore } from '~/store'
+import Users from '~/store/user'
 
 interface videoInfo {
   height: number
@@ -38,6 +40,10 @@ interface videoInfo {
     fs: number
     rel: number
     controls: number
+  }
+  playTimeInfo: {
+    playTimeoutId: number,
+    playStartedAt: number
   }
 }
 
@@ -59,7 +65,12 @@ export default Vue.extend({
         fs: 0, // フルスクリーンの禁止
         rel: 0, // 関連動画を投稿者のものだけにする
         controls: 0
+      },
+      playTimeInfo: {
+        playTimeoutId: 0,
+        playStartedAt: Date.now(),
       }
+
     }
   },
   computed: {
@@ -72,6 +83,9 @@ export default Vue.extend({
         // @ts-ignore
         '--height': String(this.height) + 'px'
       }
+    },
+    canPlay() {
+      return UserStore.getIsRemainPlayTime
     }
   },
   mounted () {
@@ -83,7 +97,11 @@ export default Vue.extend({
     setInterval(() => {
       // @ts-ignore
       this.seek()
+
     }, 500)
+  },
+  async beforeDestroy(){
+    await this.stopMeasurement()
   },
   methods: {
     ready () {
@@ -92,6 +110,9 @@ export default Vue.extend({
         // @ts-ignore
         this.length = result
       })
+    },
+    async newPlayeMinutes(minutes: number) {
+      await UserStore.postPlayedMinutes(minutes)
     },
     seek () {
       // @ts-ignore
@@ -103,13 +124,35 @@ export default Vue.extend({
         })
       }
     },
+    startMeasurement() {
+      console.info('startMeasurement')
+      // @ts-ignore
+      this.playTimeInfo.playStartedAt = Date.now()
+      this.playTimeInfo.playTimeoutId = window.setInterval(() => {
+        this.postPlayedTime()
+      }, 1000 * 10)
+    },
+    async postPlayedTime() {
+      console.info('postPlayedTime')
+      const playedSeconds = (Date.now() - this.playTimeInfo.playStartedAt) / 1000
+      console.info('played:', playedSeconds, 's')
+      await UserStore.postPlayedMinutes(playedSeconds / 60)
+      this.playTimeInfo.playStartedAt = Date.now()
+    },
+    stopMeasurement() {
+      console.info('stopMeasurement')
+      clearInterval(this.playTimeInfo.playTimeoutId)
+      this.postPlayedTime()
+    },
     play () {
       // @ts-ignore
       this.wrap = false
+      this.startMeasurement()
     },
     paused () {
       // @ts-ignore
       this.wrap = true
+      this.stopMeasurement()
     },
     ended () {
       // @ts-ignore
@@ -123,9 +166,12 @@ export default Vue.extend({
     },
     playing () {
       // @ts-ignore
-      this.player.playVideo()
-      // @ts-ignore
-      this.wrap = false
+      if(this.canPlay) {
+        // @ts-ignore
+        this.player.playVideo()
+        // @ts-ignore
+        this.wrap = false
+      }
     },
     handleResize () {
       // resizeのたびにこいつが発火するので、ここでやりたいことをやる
@@ -148,6 +194,14 @@ export default Vue.extend({
     setDrag () {
       // @ts-ignore
       this.drag = true
+    }
+  },
+  watch: {
+    canPlay(newState, oldState) {
+      if(!newState) {
+        // 超過すれば再生を停止
+        this.pause()
+      }
     }
   }
 })
