@@ -68,35 +68,8 @@ export default class Users extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async login () {
-    // eslint-disable-next-line no-console
-    console.log('login action')
-    console.log(document.location.protocol)
-    const provider = new firebase.auth.GoogleAuthProvider()
-    provider.addScope('https://www.googleapis.com/auth/youtube.readonly')
-    try {
-      const result = await firebase
-        .auth()
-        .signInWithPopup(provider)
-      const credential = result.credential as firebase.auth.OAuthCredential
-      const currentUser = result.user!
-      const userdata: User = {
-        uid: currentUser.uid,
-        userName: currentUser.displayName,
-        userIcon: currentUser.photoURL,
-        userEmail: currentUser.email,
-        accessToken: credential.accessToken
-      }
-      this.set(userdata)
-    } catch(e) {
-      // eslint-disable-next-line no-console
-      console.error('error : ' + e.code)
-    }
-  }
-
-  @Action({ rawError: true })
   async postUser () {
-    console.info('postUser')
+    console.info('postUser', this.user)
     const doc = db.collection('users').doc(this.user.uid!)
     const snapshot = await doc.get()
     if(snapshot.exists) {
@@ -177,6 +150,33 @@ export default class Users extends VuexModule {
     }
   }
 
+  @Action({ rawError: true })
+  async login () {
+    // eslint-disable-next-line no-console
+    console.log('login action')
+    console.log(document.location.protocol)
+    const provider = new firebase.auth.GoogleAuthProvider()
+    provider.addScope('https://www.googleapis.com/auth/youtube.readonly')
+    try {
+      const result = await firebase
+        .auth()
+        .signInWithPopup(provider)
+      const credential = result.credential as firebase.auth.OAuthCredential
+      const currentUser = result.user!
+      const userdata: User = {
+        uid: currentUser.uid,
+        userName: currentUser.displayName,
+        userIcon: currentUser.photoURL,
+        userEmail: currentUser.email,
+        accessToken: credential.accessToken
+      }
+      this.set(userdata)
+    } catch(e) {
+      // eslint-disable-next-line no-console
+      console.error('error : ' + e.code)
+    }
+  }
+
   // eslint-disable-next-line require-await
   @Action({ rawError: true })
   auth () {
@@ -195,11 +195,23 @@ export default class Users extends VuexModule {
         this.set(user)
         await this.fetchAccessToken(user.uid!)
       }
-      await ChannelsStore.fetchSubscriptions()
       // Firestoreの制限時間，現在の再生時間を取得する．
       await this.fetchUserTimeLimitations(this.user.uid!)
-      await this.postUser()
+
+      // 認証完了
+
+      await this.init()
     })
+  }
+
+  // 認証完了時(this.user格納完了後)に呼び出されるアクション
+  @Action({ rawError: true})
+  async init() {
+    console.info('init...')
+    // 自分の登録チャンネルを取得
+    await ChannelsStore.fetchSubscriptions()
+
+    await this.postUser()
   }
 }
 // コンポーネントでの使い方

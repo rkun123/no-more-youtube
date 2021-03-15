@@ -52,26 +52,6 @@ export default class Channels extends VuexModule {
   }
 
   @Mutation
-  private setList (items: any) {
-    for (let i = 0; i < items.length; i++) {
-      const data = items[i].snippet
-      const chan: Channel = {
-        youtubeChannelId: data.resourceId.channelId,
-        name: data.title,
-        avatar: data.thumbnails.medium.url,
-        favorite: false,
-        videos: []
-      }
-      const some = this.channels.some(
-        b => b.youtubeChannelId === chan.youtubeChannelId
-      )
-      if (!some) {
-        this.channels.push(chan)
-      }
-    }
-  }
-
-  @Mutation
   private changeFavo (key: favoPayload) {
     const target = this.channels.find((search) => {
       return search.youtubeChannelId === key.youtubeChannelId
@@ -205,8 +185,28 @@ export default class Channels extends VuexModule {
     }
     const result = await $axios
       .get('https://www.googleapis.com/youtube/v3/subscriptions', { params })
-    const items = result.data.items
-    await this.setList(items)
+    const items = result.data.items as any[]
+    const channelsWithoutVideos = items.map((item: any): Channel => {
+      const data = item.snippet
+      return ({
+        youtubeChannelId: data.resourceId.channelId,
+        name: data.title,
+        avatar: data.thumbnails.medium.url,
+        favorite: false,
+        videos: []
+      } as Channel)
+    })
+
+    // 各Channelの動画を取得
+    const channels = await Promise.all(channelsWithoutVideos.map(async (channel: Channel) => {
+      const videos = await fetchVideosByChannel(channel.youtubeChannelId!)
+      return {
+        ...channel,
+        videos
+      }
+    }))
+
+    await this.setChannels(channels)
     // FirestoreからStoreのChannelsへFavoriteの情報を取得、適用する。
     await this.fetchAndApplyFavoToAllChannels()
     // Favorite情報適用済のStoreのChannelsをFirestoreへ送り、更新する。
