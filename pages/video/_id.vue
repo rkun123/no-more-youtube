@@ -49,7 +49,7 @@ export default Vue.extend({
       const regexp_url = /((h?)(ttps?:\/\/[a-zA-Z0-9.\-_@:/~?%&;=+#',()*!]+))/g
       // eslint-disable-next-line camelcase
       const regexp_makeLink = function (url: string, href: string) {
-        return '<a href="h' + href + '">' + url + '</a>'
+        return '<a href="' + href + '">' + url + '</a>'
       }
       return text.replace(regexp_url, regexp_makeLink)
     }
