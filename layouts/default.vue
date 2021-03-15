@@ -1,6 +1,6 @@
 <template>
   <div>
-    <play-time-bar />
+    <navbar />
     <Nuxt />
   </div>
 </template>
@@ -8,11 +8,11 @@
 <script lang="ts">
 import Vue from 'vue'
 import { ChannelsStore, UserStore } from '~/store'
-import PlayTimeBar from '~/components/PlayTimeBar.vue'
+import Navbar from '~/components/Navbar.vue'
 
 export default Vue.extend({
   components: {
-    PlayTimeBar
+    Navbar
   },
   async created () {
     await UserStore.auth()

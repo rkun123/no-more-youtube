@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { config, library } from '@fortawesome/fontawesome-svg-core'
-import { faShareSquare } from '@fortawesome/free-solid-svg-icons'
+import { faShareSquare, faCog } from '@fortawesome/free-solid-svg-icons'
 import { faHandPointRight, faHeart } from '@fortawesome/free-regular-svg-icons'
 import { faYoutube } from '@fortawesome/free-brands-svg-icons'
 
@@ -9,7 +9,7 @@ import { faYoutube } from '@fortawesome/free-brands-svg-icons'
 config.autoAddCss = false
 
 // 利用するアイコンを配列に追加
-const solidIcons = [faShareSquare, faHeart]
+const solidIcons = [faShareSquare, faHeart, faCog]
 const regularIcons = [faHandPointRight, faHeart]
 const bransIcons = [faYoutube]
 

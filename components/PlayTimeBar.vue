@@ -2,10 +2,10 @@
     <div class="container">
         <div class="bar-outer">
             <div class="played-bar" :style="playedBarWidth">
-            </div>
-            <div class="played-time-label">
-                <span class="played-time-title">本日の残り時間: </span>
-                <span class="played-time-main" :style="isTimeExceeded ? 'color: red;' : ''">{{ this.currentPlayTime}}</span>
+                <div class="played-time-label">
+                    <span class="played-time-title">本日の残り時間: </span>
+                    <span class="played-time-main" :style="isTimeExceeded ? 'color: red;' : ''">{{ this.currentPlayTime}}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -33,12 +33,13 @@ export default Vue.extend({
 <style scoped>
 .container {
     width: 100%;
-    height: 50px;
+    margin-right: 10px;
 }
 .bar-outer {
     position: relative;
-    top: 10px;
-    margin: 0 10px;
+    width: 100%;
+    background-color: #cccccc;
+    border-radius: 15px;
 }
 .played-bar {
     display: block;
