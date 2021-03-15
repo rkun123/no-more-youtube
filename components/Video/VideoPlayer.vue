@@ -83,6 +83,9 @@ export default Vue.extend({
         // @ts-ignore
         '--height': String(this.height) + 'px'
       }
+    },
+    canPlay() {
+      return UserStore.getIsRemainPlayTime
     }
   },
   mounted () {
@@ -163,9 +166,12 @@ export default Vue.extend({
     },
     playing () {
       // @ts-ignore
-      this.player.playVideo()
-      // @ts-ignore
-      this.wrap = false
+      if(this.canPlay) {
+        // @ts-ignore
+        this.player.playVideo()
+        // @ts-ignore
+        this.wrap = false
+      }
     },
     handleResize () {
       // resizeのたびにこいつが発火するので、ここでやりたいことをやる
@@ -191,7 +197,12 @@ export default Vue.extend({
     }
   },
   watch: {
-
+    canPlay(newState, oldState) {
+      if(!newState) {
+        // 超過すれば再生を停止
+        this.pause()
+      }
+    }
   }
 })
 </script>

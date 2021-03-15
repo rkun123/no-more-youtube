@@ -5,7 +5,7 @@
             </div>
             <div class="played-time-label">
                 <span class="played-time-title">本日の残り時間: </span>
-                <span class="played-time-main">{{ this.currentPlayTime}}</span>
+                <span class="played-time-main" :style="isTimeExceeded ? 'color: red;' : ''">{{ this.currentPlayTime}}</span>
             </div>
         </div>
     </div>
@@ -13,6 +13,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { UserStore } from '~/store'
+import Users from '~/store/user'
 
 export default Vue.extend({
     name: 'PlayTimeBar',
@@ -22,6 +23,9 @@ export default Vue.extend({
         },
         currentPlayTime() {
             return UserStore.getPlayedTimeString
+        },
+        isTimeExceeded() {
+            return !UserStore.getIsRemainPlayTime
         }
     },
 })
