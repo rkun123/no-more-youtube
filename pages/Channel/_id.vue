@@ -44,11 +44,9 @@ export default Vue.extend({
 
 <style scoped>
 .channel-header{
-  margin-left: 10%;
   margin-top: 20px;
   display: flex;
   width: 100%;
-  max-width: 1200px;
 }
 .channel-header img {
   border-radius: 50%;
