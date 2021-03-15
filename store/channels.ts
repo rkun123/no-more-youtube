@@ -167,7 +167,6 @@ export default class Channels extends VuexModule {
     const subscriptionCollection = await getSubscriptionCollection()
     if(subscriptionCollection === null) {
       console.error('Undefined subscription collection')
-      await this.fetchSubscriptionsFromAPI()
       return
     }
     const snapshot = await subscriptionCollection.get()
