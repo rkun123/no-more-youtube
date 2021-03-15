@@ -20,15 +20,7 @@
 import Vue, { PropType } from 'vue'
 import VideoCard from './VideoCard.vue'
 import { ChannelsStore } from '~/store'
-
-interface Channel {
-  // eslint-disable-next-line camelcase
-  youtubeChannelId?: string | null,
-  name?: string | null,
-  avatar?: string | null,
-  favorite: boolean,
-  videos: any
-}
+import { Channel } from '~/store/channels'
 
 export default Vue.extend({
   components: { VideoCard },
@@ -38,18 +30,22 @@ export default Vue.extend({
       type: Object as PropType<Channel>
     }
   },
-  created () {
-    console.log('videoset')
-    ChannelsStore.setVideo(String(this.list.youtubeChannelId))
-  },
   methods: {
-    Favo () {
+    async Favo () {
       // eslint-disable-next-line vue/no-mutating-props
       this.$emit('input', true)
+      await ChannelsStore.setFavo({
+        youtubeChannelId: this.list.youtubeChannelId!,
+        favorite: true
+      })
     },
-    disFavo () {
+    async disFavo () {
       // eslint-disable-next-line vue/no-mutating-props
       this.$emit('input', false)
+      await ChannelsStore.setFavo({
+        youtubeChannelId: this.list.youtubeChannelId!,
+        favorite: false
+      })
     },
     moveChannel (id: string) {
       this.$router.push({ path: '/channel/' + id })
