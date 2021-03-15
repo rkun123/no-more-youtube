@@ -44,10 +44,8 @@ export async function fetchVideosByChannel(channelId: string): Promise<Video[]> 
     console.debug('video is not on Firestore')
     return await fetchVideosByChannelFromAPI(channelId)
   }
-  const videos: Video[] = [];
-  videoSnapshots.forEach((video) => {
-    videos.push(video.data() as Video)
-  })
+  const videos: Video[] = await videoSnapshots.docs.map((video) => (video.data() as Video))
+  //const videos: Video[] = Promise.all(videoSnapshots.map(async (video) => (await video.data() as Video)))
   console.debug(videos)
   return videos
 }
