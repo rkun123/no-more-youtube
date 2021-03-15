@@ -27,6 +27,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { UserStore } from '~/store'
+import Users from '~/store/user'
 
 interface videoInfo {
   height: number
@@ -38,6 +40,10 @@ interface videoInfo {
     fs: number
     rel: number
     controls: number
+  }
+  playTimeInfo: {
+    playTimeoutId: number,
+    playStartedAt: number
   }
 }
 
@@ -59,7 +65,12 @@ export default Vue.extend({
         fs: 0, // フルスクリーンの禁止
         rel: 0, // 関連動画を投稿者のものだけにする
         controls: 0
+      },
+      playTimeInfo: {
+        playTimeoutId: 0,
+        playStartedAt: Date.now(),
       }
+
     }
   },
   computed: {
@@ -83,6 +94,7 @@ export default Vue.extend({
     setInterval(() => {
       // @ts-ignore
       this.seek()
+
     }, 500)
   },
   methods: {
@@ -92,6 +104,9 @@ export default Vue.extend({
         // @ts-ignore
         this.length = result
       })
+    },
+    async newPlayeMinutes(minutes: number) {
+      await UserStore.postPlayedMinutes(minutes)
     },
     seek () {
       // @ts-ignore
@@ -103,13 +118,31 @@ export default Vue.extend({
         })
       }
     },
+    startMeasurement() {
+      console.info('startPlayTimeMeasurement')
+      // @ts-ignore
+      this.playTimeInfo.playStartedAt = Date.now()
+      this.playTimeInfo.playTimeoutId = window.setInterval(() => {
+        this.postPlayedTime()
+      }, 1000 * 10)
+    },
+    async postPlayedTime() {
+      console.info('postPlayedTime')
+      const playedSeconds = (Date.now() - this.playTimeInfo.playStartedAt) / 1000
+      console.info('played:', playedSeconds, 's')
+      await UserStore.postPlayedMinutes(playedSeconds / 60)
+      this.playTimeInfo.playStartedAt = Date.now()
+    },
     play () {
       // @ts-ignore
       this.wrap = false
+      this.startMeasurement()
     },
     paused () {
       // @ts-ignore
       this.wrap = true
+      this.postPlayedTime()
+      clearInterval(this.playTimeInfo.playTimeoutId)
     },
     ended () {
       // @ts-ignore
@@ -149,6 +182,9 @@ export default Vue.extend({
       // @ts-ignore
       this.drag = true
     }
+  },
+  watch: {
+
   }
 })
 </script>

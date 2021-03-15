@@ -12,32 +12,16 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import { UserStore } from '~/store'
 
 export default Vue.extend({
     name: 'PlayTimeBar',
-    props: {
-        currentPlaySeconds: {
-            type: Number,
-            default: 0,
-            required: true
-        },
-        maxPlaySeconds: {
-            type: Number,
-            default: 60 * 30,
-            required: true
-        }
-    },
     computed: {
-        playedBarWidth(): string {
-            if( this.currentPlaySeconds > this.maxPlaySeconds) return '100%'
-            return `width: ${this.currentPlaySeconds / this.maxPlaySeconds * 100}%;`
+        playedBarWidth() {
+            return `width: ${UserStore.getPlayedTimePercent}%`
         },
-        currentPlayTime(): string {
-            const restSeconds = this.maxPlaySeconds - this.currentPlaySeconds
-            if( restSeconds < 0 ) return '00:00'
-            const minutes = Math.floor(restSeconds / 60)
-            const seconds = Math.floor(restSeconds % 60) 
-            return `${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`
+        currentPlayTime() {
+            return UserStore.getPlayedTimeString
         }
     },
 })
