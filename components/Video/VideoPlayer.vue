@@ -97,6 +97,9 @@ export default Vue.extend({
 
     }, 500)
   },
+  async beforeDestroy(){
+    await this.stopMeasurement()
+  },
   methods: {
     ready () {
       // @ts-ignore
@@ -119,7 +122,7 @@ export default Vue.extend({
       }
     },
     startMeasurement() {
-      console.info('startPlayTimeMeasurement')
+      console.info('startMeasurement')
       // @ts-ignore
       this.playTimeInfo.playStartedAt = Date.now()
       this.playTimeInfo.playTimeoutId = window.setInterval(() => {
@@ -133,6 +136,11 @@ export default Vue.extend({
       await UserStore.postPlayedMinutes(playedSeconds / 60)
       this.playTimeInfo.playStartedAt = Date.now()
     },
+    stopMeasurement() {
+      console.info('stopMeasurement')
+      clearInterval(this.playTimeInfo.playTimeoutId)
+      this.postPlayedTime()
+    },
     play () {
       // @ts-ignore
       this.wrap = false
@@ -141,8 +149,7 @@ export default Vue.extend({
     paused () {
       // @ts-ignore
       this.wrap = true
-      this.postPlayedTime()
-      clearInterval(this.playTimeInfo.playTimeoutId)
+      this.stopMeasurement()
     },
     ended () {
       // @ts-ignore
