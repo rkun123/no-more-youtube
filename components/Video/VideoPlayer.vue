@@ -23,7 +23,6 @@
       @mouseup="setTime"
       @mousedown="setDrag"
     >
-    <button @click="changeSpeed">change</button>
   </div>
 </template>
 
@@ -221,9 +220,6 @@ export default Vue.extend({
     setDrag () {
       // @ts-ignore
       this.drag = true
-    },
-    changeSpeed () {
-      console.log(this.player)
     }
   }
 })
