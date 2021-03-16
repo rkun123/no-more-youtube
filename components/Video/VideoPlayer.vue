@@ -104,7 +104,7 @@ export default Vue.extend({
       }
     },
     getSpeed (newState, oldState) {
-      if (newState === 0.00) {
+      if (newState <= 0.1) {
         this.pause()
       } else {
         this.playing()
