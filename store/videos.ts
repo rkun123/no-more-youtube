@@ -4,10 +4,11 @@ import { Video, getSubscriptionCollection } from './channels'
 import { UserStore } from '../store'
 
 // 指定されたチャンネルの動画をAPIから取得する。
-export async function fetchVideosByChannelFromAPI(channelId: string): Promise<Video[]> {
+export async function fetchVideosByChannelFromAPI (channelId: string): Promise<Video[]> {
   const params = {
     part: 'snippet',
-    channelId: channelId,
+    channelId,
+    type: 'video',
     maxResults: 11, // 本番環境では50にする。
     order: 'date',
     key: String(process.env.YOUTUBE_API_KEY)
@@ -58,12 +59,15 @@ export async function postVideosByChannel(videos: Video[], channelId: string) {
     .doc(channelId)
     .collection('videos')
 
-  await videos.forEach(async (video) => {
-    console.debug('upload video', video.videoTitle!)
+  // await videos.forEach(async (video) => {
+  for (const video of videos) {
+    console.debug('upload video', video)
+    if(video.videoId === undefined) {
+      console.warn('reject post video because videoId is undefined')
+    }
     await videosCollection.doc(video.videoId!).set(video)
-  })
+  }
 }
-
 
 @Module({
   name: 'videos',
