@@ -1,6 +1,6 @@
 <template>
   <div>
-    <video-player :video-id="$route.params.id" />
+    <video-player :videoId="$route.params.id" :thumbnailUrl="video.thumbnail" />
     <div class="title">
       <h2>{{ video.title }}</h2>
     </div>
@@ -25,7 +25,8 @@ export default Vue.extend({
       },
       video: {
         title: '',
-        description: ''
+        description: '',
+        thumbnail: ''
       }
     }
   },
@@ -40,6 +41,7 @@ export default Vue.extend({
         const data = result.data.items[0].snippet
         this.video.title = data.title
         this.video.description = data.description
+        this.video.thumbnail = data.thumbnails.maxres.url
         console.log(result)
       })
   },

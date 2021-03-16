@@ -13,6 +13,7 @@
       @ended="ended"
     />
     <div v-show="wrap" class="wrap" :style="heightSet">
+      <img class="wrap-background" :src="thumbnailUrl">
       <fa class="play-button" :icon="['fab', 'youtube']" @click="playing" />
     </div>
     <input
@@ -52,6 +53,10 @@ export default Vue.extend({
     videoId: {
       type: String,
       default: '7O1WGScOKe4'
+    },
+    thumbnailUrl: {
+      type: String,
+      default: 'https://picsum.photos/1280/720'
     }
   },
   data (): videoInfo {
@@ -215,9 +220,17 @@ export default Vue.extend({
 .wrap{
   position: absolute;
   top: 0px;
-  width:100%;
+  width: 100%;
   height: var(--height);
   background-color: #050000;
+  overflow: hidden;
+}
+.wrap-background {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
 }
 .play-button{
   position: absolute;
