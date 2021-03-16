@@ -45,6 +45,12 @@ export default class Channels extends VuexModule {
     return this.channels
   }
 
+  public get getChannelsSortedByFav() {
+    const favChannels = this.channels.filter((channel) => (channel.favorite === true))
+    const notFavChannels = this.channels.filter((channel) => (channel.favorite === false))
+    return favChannels.concat(notFavChannels)
+  }
+
 
   @Mutation
   private setChannels (channels: Channel[]) {

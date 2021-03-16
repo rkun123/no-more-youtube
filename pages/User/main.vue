@@ -25,7 +25,7 @@ export default Vue.extend({
   },
   computed: {
     getChannels () {
-      return ChannelsStore.getchannels
+      return ChannelsStore.getChannelsSortedByFav
     }
   },
   methods: {
