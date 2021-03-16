@@ -23,13 +23,13 @@
       @mouseup="setTime"
       @mousedown="setDrag"
     >
+    <button @click="changeSpeed">change</button>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { UserStore } from '~/store'
-import Users from '~/store/user'
+import { UserStore, ControllerStore } from '~/store'
 
 interface videoInfo {
   height: number
@@ -73,7 +73,7 @@ export default Vue.extend({
       },
       playTimeInfo: {
         playTimeoutId: 0,
-        playStartedAt: Date.now(),
+        playStartedAt: Date.now()
       }
 
     }
@@ -89,8 +89,31 @@ export default Vue.extend({
         '--height': String(this.height) + 'px'
       }
     },
-    canPlay() {
+    canPlay () {
       return UserStore.getIsRemainPlayTime
+    },
+    getSpeed () {
+      return ControllerStore.getSpeed
+    }
+  },
+  watch: {
+    canPlay (newState, oldState) {
+      if (!newState) {
+        // 超過すれば再生を停止
+        console.log(newState, oldState)
+        this.pause()
+      }
+    },
+    getSpeed (newState, oldState) {
+      if (newState === 0.00) {
+        this.pause()
+      } else {
+        this.playing()
+      }
+      if (newState !== oldState) {
+        // @ts-ignore
+        this.player.setPlaybackRate(newState)
+      }
     }
   },
   mounted () {
@@ -102,10 +125,9 @@ export default Vue.extend({
     setInterval(() => {
       // @ts-ignore
       this.seek()
-
     }, 500)
   },
-  async beforeDestroy(){
+  async beforeDestroy () {
     await this.stopMeasurement()
   },
   methods: {
@@ -116,7 +138,7 @@ export default Vue.extend({
         this.length = result
       })
     },
-    async newPlayeMinutes(minutes: number) {
+    async newPlayeMinutes (minutes: number) {
       await UserStore.postPlayedMinutes(minutes)
     },
     seek () {
@@ -129,7 +151,7 @@ export default Vue.extend({
         })
       }
     },
-    startMeasurement() {
+    startMeasurement () {
       console.info('startMeasurement')
       // @ts-ignore
       this.playTimeInfo.playStartedAt = Date.now()
@@ -137,14 +159,14 @@ export default Vue.extend({
         this.postPlayedTime()
       }, 1000 * 10)
     },
-    async postPlayedTime() {
+    async postPlayedTime () {
       console.info('postPlayedTime')
       const playedSeconds = (Date.now() - this.playTimeInfo.playStartedAt) / 1000
       console.info('played:', playedSeconds, 's')
       await UserStore.postPlayedMinutes(playedSeconds / 60)
       this.playTimeInfo.playStartedAt = Date.now()
     },
-    stopMeasurement() {
+    stopMeasurement () {
       console.info('stopMeasurement')
       clearInterval(this.playTimeInfo.playTimeoutId)
       this.postPlayedTime()
@@ -171,7 +193,7 @@ export default Vue.extend({
     },
     playing () {
       // @ts-ignore
-      if(this.canPlay) {
+      if (this.canPlay) {
         // @ts-ignore
         this.player.playVideo()
         // @ts-ignore
@@ -199,14 +221,9 @@ export default Vue.extend({
     setDrag () {
       // @ts-ignore
       this.drag = true
-    }
-  },
-  watch: {
-    canPlay(newState, oldState) {
-      if(!newState) {
-        // 超過すれば再生を停止
-        this.pause()
-      }
+    },
+    changeSpeed () {
+      console.log(this.player)
     }
   }
 })
