@@ -24,40 +24,44 @@ export type favoPayload = {
   favorite: boolean
 }
 
-export async function getSubscriptionCollection (): Promise<firebase.firestore.CollectionReference<firebase.firestore.DocumentData>> {
+export function getSubscriptionCollection (): firebase.firestore.CollectionReference<firebase.firestore.DocumentData> {
   console.info('getSubscriptionCollection')
   const me = UserStore.getuser
   const collection = db
     .collection('users')
     .doc(me.uid!)
     .collection('subscriptions')
-  console.info(collection)
-  console.info(await collection.get())
   return collection
 }
 
 async function fetchSubscriptionsFromFS () {
   console.info('fetchSubscriptionsFromFS')
-  const collection = await getSubscriptionCollection()
+  const collection = getSubscriptionCollection()
   const snapshot = await collection.get()
-  const channelsWithoutVideos = snapshot.docs.map((item: any) => ({
-    youtubeChannelId: item.youtubeChannelId,
-    name: item.name,
-    avatar: item.avatar,
-    favorite: item.favorite
-  } as Channel))
+  const channelsWithoutVideos = snapshot.docs.map((s) => {
+    const item = s.data()
+    return {
+      youtubeChannelId: item.youtubeChannelId,
+      name: item.name,
+      avatar: item.avatar,
+      favorite: item.favorite
+    } as Channel
+  })
 
   // fetch Videos for all channels from FS
-  const channels = Promise.all(channelsWithoutVideos.map(async (channel) => {
+  const channels = await Promise.all(channelsWithoutVideos.map(async (channel) => {
     const snapshot = await collection
       .doc(channel.youtubeChannelId)
       .collection('videos')
       .get()
-    const videos = snapshot.docs.map((item: any) => ({
-      videoId: item.videoId,
-      videoTitle: item.videoTitle,
-      videoThumbnail: item.videoThumbnail
-    } as Video))
+    const videos = snapshot.docs.map((s) => {
+      const item = s.data()
+      return {
+        videoId: item.videoId,
+        videoTitle: item.videoTitle,
+        videoThumbnail: item.videoThumbnail
+      } as Video
+    })
     return ({
       ...channel,
       videos
@@ -104,10 +108,20 @@ async function fetchSubscriptionsFromAPI () {
   return channels
 }
 
+async function postFavByChannel (state: boolean, youtubeChannelId: string) {
+  console.info('postFavByChannel')
+  const collection = getSubscriptionCollection()
+  const doc = await collection.doc(youtubeChannelId)
+  console.info('state', state)
+  await doc.update({
+    favorite: state
+  })
+}
+
 // 指定されたチャンネルのFavoriteをFSから取得
 async function fetchFavByChannel (youtubeChannelId: string) {
   console.info('fetchFavByChannel')
-  const collection = await getSubscriptionCollection()
+  const collection = getSubscriptionCollection()
   const doc = await collection.doc(youtubeChannelId)
   const channel = (await doc.get()).data()
 
@@ -118,17 +132,17 @@ async function fetchFavByChannel (youtubeChannelId: string) {
 }
 
 // 渡されたチャンネルの情報をFSへ送信
-async function postSubscriptions (channels: Channel[]) {
+function postSubscriptions (channels: Channel[]) {
   console.info('postSubscriptions')
-  const subscriptionCollections = await getSubscriptionCollection()
-  channels.forEach((channel) => {
+  const subscriptionCollections = getSubscriptionCollection()
+  channels.forEach(async (channel) => {
     const channelWithoutVideos = {
       ...channel,
       videos: []
     } as Channel
     console.info('channelWithoutVideos', channelWithoutVideos)
-    subscriptionCollections.doc(channel.youtubeChannelId).set(channelWithoutVideos)
-    postVideosByChannel(channel.videos!, channel.youtubeChannelId)
+    await subscriptionCollections.doc(channel.youtubeChannelId).set(channelWithoutVideos)
+    await postVideosByChannel(channel.videos!, channel.youtubeChannelId)
   })
 }
 
@@ -158,18 +172,18 @@ export default class Channels extends VuexModule {
   }
 
   @Mutation
-  private _setFavorite (state: boolean, youtubeChannelId: string) {
+  private _setFavorite (payload: favoPayload) {
     const target = this.channels.find((search) => {
-      return search.youtubeChannelId === youtubeChannelId
+      return search.youtubeChannelId === payload.youtubeChannelId
     })
     if (target === undefined) { return }
-    target.favorite = state
+    target.favorite = payload.favorite
   }
 
   // 常に取得に利用するアクション
   @Action({ rawError: true })
   async fetchSubscriptions () {
-    const collections = await getSubscriptionCollection()
+    const collections = getSubscriptionCollection()
     const snapshot = await collections.get()
     let channels: Channel[] = []
     if (!snapshot.empty) {
@@ -181,7 +195,7 @@ export default class Channels extends VuexModule {
       channels = await fetchSubscriptionsFromAPI()
     }
     this.setChannels(channels)
-    await postSubscriptions(this.channels)
+    postSubscriptions(this.channels)
   }
 
   // FirestoreにSubscriptionsがある状態で強制的に更新するアクション`
@@ -202,8 +216,8 @@ export default class Channels extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async setFavorite (state: boolean, youtubeChannelId: string) {
-    this._setFavorite(state, youtubeChannelId)
-    await postSubscriptions(this.channels)
+  async setFavorite (payload: favoPayload) {
+    this._setFavorite(payload)
+    await postFavByChannel(payload.favorite, payload.youtubeChannelId)
   }
 }

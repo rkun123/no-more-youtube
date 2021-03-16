@@ -22,7 +22,7 @@
 import Vue, { PropType } from 'vue'
 import VideoCard from './VideoCard.vue'
 import { ChannelsStore } from '~/store'
-import { Channel } from '~/store/channels'
+import { Channel, favoPayload } from '~/store/channels'
 
 export default Vue.extend({
   components: { VideoCard },
@@ -36,12 +36,19 @@ export default Vue.extend({
     async Favo () {
       // eslint-disable-next-line vue/no-mutating-props
       this.$emit('input', true)
-      await ChannelsStore.setFavorite( true, this.list.youtubeChannelId)
+      console.info('Favo', this.list.youtubeChannelId)
+      await ChannelsStore.setFavorite({
+        youtubeChannelId: this.list.youtubeChannelId,
+        favorite: true
+      } as favoPayload)
     },
     async disFavo () {
       // eslint-disable-next-line vue/no-mutating-props
       this.$emit('input', false)
-      await ChannelsStore.setFavorite( true, this.list.youtubeChannelId)
+      await ChannelsStore.setFavorite({
+        youtubeChannelId: this.list.youtubeChannelId,
+        favorite: false
+      } as favoPayload)
     },
     moveChannel (id: string) {
       this.$router.push({ path: '/channel/' + id })

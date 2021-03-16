@@ -10,6 +10,7 @@
 import Vue from 'vue'
 import MainPage from '~/components/Channel/MainPage.vue'
 import { ChannelsStore } from '~/store'
+import { favoPayload } from '~/store/channels'
 
 export default Vue.extend({
   components: { MainPage },
@@ -30,7 +31,10 @@ export default Vue.extend({
   },
   methods: {
     check (id: string, event: boolean) {
-      ChannelsStore.setFavorite(event, id)
+      ChannelsStore.setFavorite({
+        youtubeChannelId: id,
+        favorite: event
+      } as favoPayload)
     }
   }
 })
