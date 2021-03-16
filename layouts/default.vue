@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="main-container">
     <navbar />
     <Nuxt />
   </div>
@@ -16,12 +16,29 @@ export default Vue.extend({
   },
   async created () {
     await UserStore.auth()
-    await ChannelsStore.fetchSubscriptions()
   }
 })
 </script>
 
 <style>
+
+.main-container {
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+@media screen and (min-width: 1280px) {
+  .main-container {
+    width: 1280px;
+  }
+}
+
+@media screen and (max-width: 1280px) {
+  .main-container {
+    width: 100%;
+  }
+}
+
 html {
   font-family:
     'Source Sans Pro',
