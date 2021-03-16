@@ -7,15 +7,21 @@
     <div class="description">
       <p v-html="textLink(this.video.description)" />
     </div>
+    <controller-status class="controller-status"/>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import VideoPlayer from '~/components/Video/VideoPlayer.vue'
+import ControllerStatus from '~/components/ControllerStatus.vue'
+import { ControllerStore } from '~/store'
 
 export default Vue.extend({
-  components: { VideoPlayer },
+  components: {
+    VideoPlayer,
+    ControllerStatus
+  },
   data () {
     return {
       params: {
@@ -69,5 +75,10 @@ export default Vue.extend({
   white-space: pre-wrap;
   word-wrap:break-word;
   color: #030303;
+}
+.controller-status {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
 }
 </style>

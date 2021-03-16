@@ -1,40 +1,28 @@
 <template>
-  <div class="container">
+  <div class="main-container">
     <div>
-      <Logo />
       <h1 class="title">
         brachio-cup-youtube
       </h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
+      <controller-setting />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import ControllerSetting from '~/components/ControllerSetting.vue'
 
-export default Vue.extend({})
+export default Vue.extend({
+  name: 'index',
+  components: {
+    ControllerSetting
+  }
+})
 </script>
 
 <style>
-.container {
+.main-container {
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
@@ -56,7 +44,6 @@ export default Vue.extend({})
     sans-serif;
   display: block;
   font-weight: 300;
-  font-size: 100px;
   color: #35495e;
   letter-spacing: 1px;
 }
