@@ -1,21 +1,26 @@
 <template>
   <div class="navbar-container">
-    <play-time-bar class="bar"/>
-    <nuxt-link to="/settings">
-      <fa class="cog" :icon="['fas', 'cog']" />
-    </nuxt-link>
+    <play-time-bar class="bar" />
+    <fa class="cog" :icon="['fas', 'cog']" @click="open=!open" />
+    <setting :is-open="open" class="bar" @input="open = $event"/>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import PlayTimeBar from './PlayTimeBar.vue'
+import Setting from './Setting/setting.vue'
 
 export default Vue.extend({
   name: 'Navbar',
   components: {
-    PlayTimeBar
+    PlayTimeBar,
+    Setting
   },
-
+  data () {
+    return {
+      open: false
+    }
+  }
 })
 </script>
 <style scoped>
