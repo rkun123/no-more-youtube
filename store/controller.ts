@@ -16,6 +16,7 @@ export default class Controller extends VuexModule {
   private controllerUrl = ''
   private websocket?: WebSocket
   private connected: boolean = false
+  private error?: string = undefined
 
   public get getSpeed () {
     return this.speed
@@ -27,6 +28,11 @@ export default class Controller extends VuexModule {
 
   public get getConnected () {
     return this.connected
+  }
+
+  public get getError () {
+    console.info('getError', this.error)
+    return this.error
   }
 
   @Mutation
@@ -62,6 +68,12 @@ export default class Controller extends VuexModule {
     this.connected = state
   }
 
+  @Mutation
+  private setError (error?: string) {
+    console.info('setError', error)
+    this.error = error
+  }
+
   @Action({ rawError: true })
   public setControllerUrl (url: string) {
     this._setControllerUrl(url)
@@ -72,24 +84,32 @@ export default class Controller extends VuexModule {
     if (this.controllerUrl === undefined) {
       console.error('Controller URL has not set')
     }
-    const ws = new WebSocket(this.controllerUrl)
+    try {
+      const ws = new WebSocket(this.controllerUrl)
+      this.setWebsocket(ws)
 
-    ws.addEventListener('error', (e) => {
-      console.error(e)
-    })
+      ws.addEventListener('error', (e) => {
+        console.error(e)
+        this.setError('Couldn\'t connct to controller.')
+      })
 
-    ws.addEventListener('open', () => {
-      this.setConnected(true)
-    })
+      ws.addEventListener('open', () => {
+        this.setConnected(true)
+        this.setError(undefined)
+      })
 
-    ws.addEventListener('close', () => {
-      this.setConnected(false)
-    })
+      ws.addEventListener('close', () => {
+        this.setConnected(false)
+      })
 
-    ws.addEventListener('message', (e) => {
-      const str = e.data as string
-      this.receiveControllerInfo(str)
-    })
+      ws.addEventListener('message', (e) => {
+        const str = e.data as string
+        this.receiveControllerInfo(str)
+      })
+    } catch (e) {
+      this.setError((e as Error).message)
+      console.error(this.error)
+    }
   }
 
   @Action({ rawError: true })

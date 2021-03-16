@@ -9,8 +9,13 @@
           <button class="button">接続せず続行</button>
         </nuxt-link>
       </div>
-      <div v-if="isConnected">
+
+      <div v-if="isConnected" class="notification is-primary">
         <h3>Connected!!</h3>
+      </div>
+      <div v-if="getError !== undefined" class="notification is-danger">
+        <h3>Error occured!!</h3>
+        {{ getError }}
       </div>
     </div>
   </div>
@@ -21,8 +26,11 @@ import { ControllerStore } from '~/store'
 export default Vue.extend({
   name: 'ControllerSetting',
   computed: {
-    isConnected() {
+    isConnected () {
       return ControllerStore.getConnected
+    },
+    getError () {
+      return ControllerStore.getError
     }
   },
   methods: {
@@ -30,7 +38,7 @@ export default Vue.extend({
       // @ts-ignore
       ControllerStore.setControllerUrl(`ws://${e.target.value}:81`)
     },
-    connect() {
+    connect () {
       ControllerStore.subscribe()
     }
   },
