@@ -130,7 +130,7 @@ void loop() {
     if(setZGyro != 100.0){
       float nowZGyro = mpu6050.getAngleZ();
       unsigned long nowTime = millis();
-      float setspeed = fabsf((setZGyro-nowZGyro)/(nowTime-startTime))*2; /* かける値は要変更 */
+      float setspeed = fabsf((setZGyro-nowZGyro)/(nowTime-startTime))*4.0; /* かける値は要変更 */
       M5.Lcd.setTextSize(6);
       M5.Lcd.setCursor(50,90);
       M5.Lcd.printf("%3.2f",setspeed );M5.Lcd.print(" x");
