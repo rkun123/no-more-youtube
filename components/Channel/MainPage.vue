@@ -3,7 +3,7 @@
     <div class="channel">
       <div @click="moveChannel(list.youtubeChannelId)" class="channel-title">
         <img class="icon" :src="list.avatar">
-        <p>{{ list.name }}</p>
+        <div>{{ list.name }}</div>
       </div>
       <fa v-if="!list.favorite" class="heart not-fav" :icon="['far', 'heart']" @click="Favo" />
       <fa v-if="list.favorite" class="heart fav" :icon="['far', 'heart']" @click="disFavo" />
@@ -62,20 +62,23 @@ export default Vue.extend({
   display: flex;
   justify-items: center;
   cursor: pointer;
+  margin-top: 1rem;
 }
 .channel .channel-title {
   display: flex;
+  align-items: center;
+  font-size: 20px;
 }
-.channel p {
-  line-height: 50px;
-  padding-left: 5px;
+.channel div {
+  margin-left: .5em;
+  font-weight: 500;
 }
 .channel .icon {
   height: 50px;
   border-radius: 50%;
 }
 .channel .heart {
-  margin-left: 10px;
+  margin-left: 1em;
   margin-top: 15px;
   font-size: 20px;
 }
