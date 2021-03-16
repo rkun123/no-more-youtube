@@ -1,3 +1,4 @@
+import { faTheRedYeti } from '@fortawesome/free-brands-svg-icons';
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import firebase, { db } from '~/plugins/Auth/firebase'
 import { ChannelsStore } from '../store'
@@ -10,7 +11,8 @@ export type User = {
   accessToken?: string,
   limitPlayMinutes?: number,
   currentPlayedMinutes?: number
-  latestPlayedMinutesUpdatedAt?: number
+  latestPlayedMinutesUpdatedAt?: number,
+  latestlimitPlayMinutesUpdatedAt?: boolean,
 }
 
 @Module({
@@ -52,6 +54,14 @@ export default class Users extends VuexModule {
     return true
   }
 
+  public get getLimitPlayMinutes () {
+    return this.user.limitPlayMinutes
+  }
+
+  public get ableChange () {
+    return this.user.latestlimitPlayMinutesUpdatedAt
+  }
+
   @Mutation set (data: User) {
     this.user = data
   }
@@ -62,9 +72,28 @@ export default class Users extends VuexModule {
   }
 
   @Mutation
-  resetPlayedMinutes() {
+  resetPlayedMinutes () {
     this.user.currentPlayedMinutes = 0
     this.user.latestPlayedMinutesUpdatedAt = Date.now()
+  }
+
+  @Mutation
+  resetLimitTimes () {
+    this.user.latestlimitPlayMinutesUpdatedAt = false
+  }
+
+  @Mutation
+  setLimitTime (num:Number) {
+    this.user.limitPlayMinutes! += Number(num)
+    this.user.latestlimitPlayMinutesUpdatedAt = true
+  }
+
+  @Action({ rawError: true })
+  async changeLimit (num:Number) {
+    if (!this.user.latestlimitPlayMinutesUpdatedAt) {
+      await this.setLimitTime(num)
+      await this.postUser()
+    }
   }
 
   @Action({ rawError: true })
@@ -113,18 +142,19 @@ export default class Users extends VuexModule {
         ...this.user,
         limitPlayMinutes: userDoc.data()!.limitPlayMinutes,
         currentPlayedMinutes: userDoc.data()!.currentPlayedMinutes,
-        latestPlayedMinutesUpdatedAt: userDoc.data()!.latestPlayedMinutesUpdatedAt
+        latestPlayedMinutesUpdatedAt: userDoc.data()!.latestPlayedMinutesUpdatedAt,
+        latestlimitPlayMinutesUpdatedAt: userDoc.data()!.latestlimitPlayMinutesUpdatedAt
       })
 
       // 前回の更新が昨日以前であれば再生時間のリセット
       const now = new Date()
       const todayMidnight = new Date(now.getFullYear(),now.getMonth(),now.getDate(),0,0,0).getTime()
-      if( this.user.latestPlayedMinutesUpdatedAt! < todayMidnight) {
+      if (this.user.latestPlayedMinutesUpdatedAt! < todayMidnight) {
         // 前回の更新が昨日以前の場合，リセットしてtrueを返す．
         console.info('latest update at before yesterday -> reset playMinutes.')
         this.resetPlayedMinutes()
+        this.resetLimitTimes()
       }
-
     } else {
       // Firestoreに制限時間のデータが存在しないため，デフォルト値でStoreに格納．
       console.info('use default limitation')
@@ -132,17 +162,17 @@ export default class Users extends VuexModule {
         ...this.user,
         limitPlayMinutes: 60,
         currentPlayedMinutes: 0,
-        latestPlayedMinutesUpdatedAt: Date.now()
+        latestPlayedMinutesUpdatedAt: Date.now(),
+        latestlimitPlayMinutesUpdatedAt: false
       })
-
     }
   }
 
   // Firestoreからアクセストークンを取得する．
   @Action({ rawError: true })
-  async fetchAccessToken(uid: string) {
+  async fetchAccessToken (uid: string) {
     const userDoc = await db.collection('users').doc(uid).get()
-    if(userDoc.exists) {
+    if (userDoc.exists) {
       this.set({
         ...this.user,
         accessToken: userDoc.data()!.accessToken
@@ -171,7 +201,7 @@ export default class Users extends VuexModule {
         accessToken: credential.accessToken
       }
       this.set(userdata)
-    } catch(e) {
+    } catch (e) {
       // eslint-disable-next-line no-console
       console.error('error : ' + e.code)
     }
@@ -210,8 +240,8 @@ export default class Users extends VuexModule {
   }
 
   // 認証完了時(this.user格納完了後)に呼び出されるアクション
-  @Action({ rawError: true})
-  async initAfterAuth() {
+  @Action({ rawError: true })
+  async initAfterAuth () {
     console.info('init...')
     // 自分の登録チャンネルを取得
     await ChannelsStore.fetchSubscriptions()
