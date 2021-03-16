@@ -86,6 +86,7 @@ void calcGyroOffsets()
   M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
   M5.Lcd.println("M5Stack Balance Mode start");
   connecting = true;
+  M5.Lcd.clear();
 }
 
 void setup() {
@@ -126,18 +127,17 @@ void loop() {
     if(setZGyro != 100.0){
       float nowZGyro = mpu6050.getAngleZ();
       unsigned long nowTime = millis();
-      M5.Lcd.clear();
-      M5.Lcd.setCursor(0, 0);
-      M5.Lcd.printf("Z: %f", nowZGyro);
-      M5.Lcd.setCursor(0, 20);
-      M5.Lcd.printf("speed: %f", (setZGyro-nowZGyro)/(nowTime-startTime));
-      String ZGyro = String(nowZGyro);
-      String Speed = String((setZGyro-nowZGyro)/(nowTime-startTime));
+      float setspeed = fabsf((setZGyro-nowZGyro)/(nowTime-startTime))*2; /* かける値は要変更 */
+      M5.Lcd.setTextSize(5);
+      M5.Lcd.setCursor(0,0);
+      M5.Lcd.printf("%4.3f",setspeed );M5.Lcd.print(" x");
+      String ZGyro = String(int(nowZGyro));
+      String Speed = String(setspeed);
       String payload = ZGyro + "," + Speed;
       setZGyro = nowZGyro;
       startTime = nowTime;
       webSocket.broadcastTXT(payload);
-      delay(5);
+      delay(100);
     } else {
       setZGyro = mpu6050.getAngleZ();
       startTime = millis();
