@@ -84,15 +84,17 @@ export default class Users extends VuexModule {
 
   @Mutation
   setLimitTime (num:Number) {
-    this.user.limitPlayMinutes! += Number(num)
+    this.user.limitPlayMinutes! = Number(num)
     this.user.latestlimitPlayMinutesUpdatedAt = true
   }
 
   @Action({ rawError: true })
   async changeLimit (num:Number) {
     if (!this.user.latestlimitPlayMinutesUpdatedAt) {
-      await this.setLimitTime(num)
-      await this.postUser()
+      if (confirm('一日に一度しか変更できませんがよろしいですか？')) {
+        await this.setLimitTime(num)
+        await this.postUser()
+      }
     }
   }
 
