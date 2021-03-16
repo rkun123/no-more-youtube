@@ -1,6 +1,6 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
+import { ChannelsStore, UIStore } from '../store'
 import firebase, { db } from '~/plugins/Auth/firebase'
-import { ChannelsStore } from '../store'
 
 export type User = {
   uid?: string | null,
@@ -180,6 +180,7 @@ export default class Users extends VuexModule {
   // eslint-disable-next-line require-await
   @Action({ rawError: true })
   auth () {
+    UIStore.setAuthPending(true)
     const unsubscribe = firebase.auth().onAuthStateChanged(async (currentUser) => {
       if (currentUser === null) {
         console.info('ReLogging in...')
@@ -205,6 +206,7 @@ export default class Users extends VuexModule {
 
       // 認証完了
 
+      UIStore.setAuthPending(false)
       await this.initAfterAuth()
     })
   }
