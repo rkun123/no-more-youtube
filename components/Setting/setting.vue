@@ -1,15 +1,15 @@
 <template>
   <div :class="IsOpen">
     <div class="contents">
-      <fa class="forward minus icon" :icon="['fas', 'forward']" @click="changeLimit(-60)" />
-      <fa class="play minus icon" :icon="['fas', 'play']" @click="changeLimit(-30)" />
+      <fa class="forward minus pict" :icon="['fas', 'forward']" @click="changeLimit(-60)" />
+      <fa class="play minus pict" :icon="['fas', 'play']" @click="changeLimit(-30)" />
       <span class="times">
-        <fa class="watch icon" :icon="['fas', 'stopwatch']" />
+        <fa class="watch pict" :icon="['fas', 'stopwatch']" />
         <div>{{ display_minutes }}</div>
       </span>
-      <fa class="play plus icon" :icon="['fas', 'play']" @click="changeLimit(30)" />
-      <fa class="forward plus icon" :icon="['fas', 'forward']" @click="changeLimit(60)" />
-      <fa class="check icon" :icon="['far', 'check-circle']" @click="setLimit" />
+      <fa class="play plus pict" :icon="['fas', 'play']" @click="changeLimit(30)" />
+      <fa class="forward plus pict" :icon="['fas', 'forward']" @click="changeLimit(60)" />
+      <fa class="check pict" :icon="['far', 'check-circle']" @click="setLimit" />
     </div>
     <div v-if="isOpen" class="wrap" @click="$emit('input', false)"></div>
   </div>
@@ -32,7 +32,7 @@ export default Vue.extend({
   },
   computed: {
     IsOpen () {
-      let re = 'modal'
+      let re = 'root'
       if (this.isOpen) {
         re += ' isopen'
       }
@@ -87,12 +87,11 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.modal {
+.root {
   position: fixed;
   top: 10px;
   right: -20px;
   width: 0;
-  height: 35px;
   border-radius: 22.5px;
   background-color:#fff;
   padding: 5px;
@@ -106,7 +105,6 @@ export default Vue.extend({
 .contents {
   z-index: 10;
   display: flex;
-  position: absolute;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
@@ -125,7 +123,7 @@ export default Vue.extend({
 .times div {
   line-height: 30px;
 }
-.icon {
+.pict {
   margin-left: 10px;
   margin-right: 10px;
   cursor: pointer;
