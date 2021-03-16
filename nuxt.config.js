@@ -34,7 +34,8 @@ export default {
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
-    '@fortawesome/fontawesome-svg-core/styles.css'
+    '@fortawesome/fontawesome-svg-core/styles.css',
+    'bulma/css/bulma.css'
   ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins

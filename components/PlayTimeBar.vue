@@ -1,7 +1,7 @@
 <template>
-    <div class="container">
-        <div class="bar-outer">
-            <div class="played-bar" :style="playedBarWidth">
+    <div class="root">
+        <div class="bar-outer has-background-grey-lighter">
+            <div class="played-bar has-background-primary" :style="playedBarWidth">
             </div>
             <div class="played-time-label">
                 <span class="played-time-title">本日の残り時間: </span>
@@ -31,7 +31,7 @@ export default Vue.extend({
 })
 </script>
 <style scoped>
-.container {
+.root {
     width: 100%;
     margin-right: 10px;
 }
@@ -44,7 +44,6 @@ export default Vue.extend({
 .played-bar {
     display: block;
     position: relative;
-    background-color: #cf9494;
     height: 30px;
     border-radius: 15px;
 }

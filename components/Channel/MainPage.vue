@@ -2,7 +2,7 @@
   <div>
     <div class="channel">
       <div @click="moveChannel(list.youtubeChannelId)" class="channel-title">
-        <img class="icon" :src="list.avatar">
+        <img class="channel-icon" :src="list.avatar">
         <div>{{ list.name }}</div>
       </div>
       <fa v-if="!list.favorite" class="heart not-fav" :icon="['far', 'heart']" @click="Favo" />
@@ -10,7 +10,7 @@
     </div>
     <div class="videos">
       <div v-for="video in list.videos" :key="video.num">
-        <div class="card">
+        <div class="video-card">
           <video-card :videos="video" />
         </div>
       </div>
@@ -73,7 +73,7 @@ export default Vue.extend({
   margin-left: .5em;
   font-weight: 500;
 }
-.channel .icon {
+.channel .channel-icon {
   height: 50px;
   border-radius: 50%;
 }
@@ -99,7 +99,7 @@ export default Vue.extend({
   padding: 5px;
   display: flex;
 }
-.videos .card{
+.videos .video-card{
   margin: 5px;
 }
 </style>

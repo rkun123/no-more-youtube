@@ -4,17 +4,27 @@
       <navbar />
       <Nuxt />
     </div>
+    <transition name="fade">
+      <authentication-pending-cover v-if="isAuthPending" class="pending-cover has-background-dark" />
+    </transition>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { UserStore } from '~/store'
+import { UserStore, UIStore } from '~/store'
 import Navbar from '~/components/Navbar.vue'
+import AuthenticationPendingCover from '~/components/UI/AuthenticationPendingCover.vue'
 
 export default Vue.extend({
   components: {
-    Navbar
+    Navbar,
+    AuthenticationPendingCover
+  },
+  computed: {
+    isAuthPending () {
+      return UIStore.getAuthPending
+    }
   },
   async created () {
     await UserStore.auth()
@@ -104,5 +114,16 @@ html {
 .button--grey:hover {
   color: #fff;
   background-color: #35495e;
+}
+.pending-cover {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+.fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

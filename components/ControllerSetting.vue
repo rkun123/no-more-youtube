@@ -2,10 +2,20 @@
   <div class="controller-setting">
     <h3>コントローラーのIPアドレスを入力ください．</h3>
     <div>
-      <input type="text" class="ip-box" @change="setControllerUrl">
-      <button class="button" @click="connect">Connect</button>
-      <div v-if="isConnected">
+      <input type="text" class="input ip-box" @change="setControllerUrl">
+      <div class="is-flex is-justify-content-center buttons">
+        <button class="button is-primary" @click="connect">接続</button>
+        <nuxt-link to="/user/main">
+          <button class="button">接続せず続行</button>
+        </nuxt-link>
+      </div>
+
+      <div v-if="isConnected" class="notification is-primary">
         <h3>Connected!!</h3>
+      </div>
+      <div v-if="getError !== undefined" class="notification is-danger">
+        <h3>Error occured!!</h3>
+        {{ getError }}
       </div>
     </div>
   </div>
@@ -16,8 +26,11 @@ import { ControllerStore } from '~/store'
 export default Vue.extend({
   name: 'ControllerSetting',
   computed: {
-    isConnected() {
+    isConnected () {
       return ControllerStore.getConnected
+    },
+    getError () {
+      return ControllerStore.getError
     }
   },
   methods: {
@@ -25,7 +38,7 @@ export default Vue.extend({
       // @ts-ignore
       ControllerStore.setControllerUrl(`ws://${e.target.value}:81`)
     },
-    connect() {
+    connect () {
       ControllerStore.subscribe()
     }
   },
@@ -47,7 +60,7 @@ export default Vue.extend({
 }
 .ip-box {
 }
-.button {
-  height: 2rem;
+.buttons {
+  margin-top: 1em;
 }
 </style>

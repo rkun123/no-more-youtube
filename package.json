@@ -20,11 +20,13 @@
     "@nuxt/typescript-runtime": "^2.0.1",
     "@nuxtjs/axios": "^5.12.5",
     "@nuxtjs/dotenv": "^1.4.1",
+    "bulma": "^0.9.2",
     "core-js": "^3.8.3",
     "firebase": "^8.2.10",
     "nuxt": "^2.14.12",
-    "save": "^2.4.0",
     "nuxt-fontawesome": "^0.4.0",
+    "save": "^2.4.0",
+    "spinkit": "^2.0.1",
     "vue-youtube": "^1.4.0"
   },
   "devDependencies": {

@@ -10,7 +10,7 @@
     </div>
     <div class="videos">
       <div v-for="video in get_videos" :key="video.num">
-        <div class="card">
+        <div class="video-card">
           <video-card :videos="video" />
         </div>
       </div>
@@ -78,7 +78,7 @@ export default Vue.extend({
   flex-wrap: wrap;
   justify-content:center
 }
-.videos .card{
+.videos .video-card{
   margin: 5px;
 }
 </style>
