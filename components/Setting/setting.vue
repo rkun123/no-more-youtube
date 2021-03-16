@@ -47,7 +47,7 @@ export default Vue.extend({
       return `${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}`
     },
     check_able () {
-      return UserStore.ableChange
+      return UserStore.disableChange
     }
   },
   watch: {

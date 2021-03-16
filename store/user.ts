@@ -1,4 +1,3 @@
-import { faTheRedYeti } from '@fortawesome/free-brands-svg-icons';
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import firebase, { db } from '~/plugins/Auth/firebase'
 import { ChannelsStore } from '../store'
@@ -12,7 +11,7 @@ export type User = {
   limitPlayMinutes?: number,
   currentPlayedMinutes?: number
   latestPlayedMinutesUpdatedAt?: number,
-  latestlimitPlayMinutesUpdatedAt?: boolean,
+  isDisbleToUpdatePlayMinutesLimit?: boolean,
 }
 
 @Module({
@@ -58,8 +57,8 @@ export default class Users extends VuexModule {
     return this.user.limitPlayMinutes
   }
 
-  public get ableChange () {
-    return this.user.latestlimitPlayMinutesUpdatedAt
+  public get disableChange () {
+    return this.user.isDisbleToUpdatePlayMinutesLimit
   }
 
   @Mutation set (data: User) {
@@ -79,18 +78,18 @@ export default class Users extends VuexModule {
 
   @Mutation
   resetLimitTimes () {
-    this.user.latestlimitPlayMinutesUpdatedAt = false
+    this.user.isDisbleToUpdatePlayMinutesLimit = false
   }
 
   @Mutation
   setLimitTime (num:Number) {
     this.user.limitPlayMinutes! = Number(num)
-    this.user.latestlimitPlayMinutesUpdatedAt = true
+    this.user.isDisbleToUpdatePlayMinutesLimit = true
   }
 
   @Action({ rawError: true })
   async changeLimit (num:Number) {
-    if (!this.user.latestlimitPlayMinutesUpdatedAt) {
+    if (!this.user.isDisbleToUpdatePlayMinutesLimit) {
       if (confirm('一日に一度しか変更できませんがよろしいですか？')) {
         await this.setLimitTime(num)
         await this.postUser()
@@ -145,7 +144,7 @@ export default class Users extends VuexModule {
         limitPlayMinutes: userDoc.data()!.limitPlayMinutes,
         currentPlayedMinutes: userDoc.data()!.currentPlayedMinutes,
         latestPlayedMinutesUpdatedAt: userDoc.data()!.latestPlayedMinutesUpdatedAt,
-        latestlimitPlayMinutesUpdatedAt: userDoc.data()!.latestlimitPlayMinutesUpdatedAt
+        isDisbleToUpdatePlayMinutesLimit: userDoc.data()!.isDisbleToUpdatePlayMinutesLimit
       })
 
       // 前回の更新が昨日以前であれば再生時間のリセット
@@ -165,7 +164,7 @@ export default class Users extends VuexModule {
         limitPlayMinutes: 60,
         currentPlayedMinutes: 0,
         latestPlayedMinutesUpdatedAt: Date.now(),
-        latestlimitPlayMinutesUpdatedAt: false
+        isDisbleToUpdatePlayMinutesLimit: false
       })
     }
   }
