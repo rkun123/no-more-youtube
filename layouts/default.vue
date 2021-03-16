@@ -1,13 +1,15 @@
 <template>
-  <div class="main-container">
-    <navbar />
-    <Nuxt />
+  <div class="main-container-outer">
+    <div class="main-container">
+      <navbar />
+      <Nuxt />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { ChannelsStore, UserStore } from '~/store'
+import { UserStore } from '~/store'
 import Navbar from '~/components/Navbar.vue'
 
 export default Vue.extend({
@@ -19,12 +21,22 @@ export default Vue.extend({
   }
 })
 </script>
-
-<style>
-
+<style scoped>
+.main-container-outer {
+  display: flex;
+  justify-content: center;
+}
 .main-container {
-  margin-left: 50%;
-  transform: translateX(-50%);
+  font-family:
+    'Quicksand',
+    'Source Sans Pro',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
 }
 
 @media screen and (min-width: 1280px) {

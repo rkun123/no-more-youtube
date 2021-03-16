@@ -1,10 +1,10 @@
 <template>
-  <div class="main-container">
+  <div class="container">
     <div>
       <h1 class="title">
         brachio-cup-youtube
       </h1>
-      <controller-setting />
+      <controller-setting class="setting"/>
     </div>
   </div>
 </template>
@@ -20,28 +20,8 @@ export default Vue.extend({
   }
 })
 </script>
-
-<style>
-.main-container {
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
+<style scoped>
 .title {
-  font-family:
-    'Quicksand',
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
   display: block;
   font-weight: 300;
   color: #35495e;
@@ -58,5 +38,11 @@ export default Vue.extend({
 
 .links {
   padding-top: 15px;
+}
+
+.container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
