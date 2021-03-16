@@ -30,11 +30,7 @@ export default Vue.extend({
   },
   methods: {
     check (id: string, event: boolean) {
-      const payload = {
-        youtubeChannelId: id,
-        favorite: event
-      }
-      ChannelsStore.setFavo(payload)
+      ChannelsStore.setFavorite(event, id)
     }
   }
 })
