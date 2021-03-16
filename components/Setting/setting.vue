@@ -1,14 +1,14 @@
 <template>
   <div :class="IsOpen">
     <div class="contents">
-      <fa class="forward plus icon" :icon="['fas', 'forward']" @click="changeLimit(-60)" />
-      <fa class="play plus icon" :icon="['fas', 'play']" @click="changeLimit(-30)" />
+      <fa class="forward minus icon" :icon="['fas', 'forward']" @click="changeLimit(-60)" />
+      <fa class="play minus icon" :icon="['fas', 'play']" @click="changeLimit(-30)" />
       <span class="times">
         <fa class="watch icon" :icon="['fas', 'stopwatch']" />
         <div>{{ display_minutes }}</div>
       </span>
-      <fa class="play minus icon" :icon="['fas', 'play']" @click="changeLimit(30)" />
-      <fa class="forward minus icon" :icon="['fas', 'forward']" @click="changeLimit(60)" />
+      <fa class="play plus icon" :icon="['fas', 'play']" @click="changeLimit(30)" />
+      <fa class="forward plus icon" :icon="['fas', 'forward']" @click="changeLimit(60)" />
       <fa class="check icon" :icon="['far', 'check-circle']" @click="setLimit" />
     </div>
     <div v-if="isOpen" class="wrap" @click="$emit('input', false)"></div>
