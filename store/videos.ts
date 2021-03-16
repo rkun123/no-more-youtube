@@ -77,37 +77,4 @@ export default class Videos extends VuexModule {
     return this.videos
   }
 
-  @Mutation
-  private pushVideos(items: any) {
-    items.map((item: any) => {
-      const video: Video = {
-        videoId: item.id.videoId,
-        videoTitle: item.snippet.title,
-        videoThumbnail: item.snippet.thumbnails.medium.url
-      }
-
-      const index = this.videos.findIndex((_video) => (
-        _video.videoId === video.videoId
-      ))
-
-      if(index === -1) this.videos.push(video)
-      else this.videos[index] = video
-    })
-    for (let i = 0; i < items.length; i++) {
-      const data = items[i].snippet
-      const chan: Video = {
-        videoId: items[i].id.videoId,
-        videoTitle: data.title,
-        videoThumbnail: data.thumbnails.medium.url
-      }
-      const some = this.videos.some(
-        b => b.videoId === chan.videoId
-      )
-      if (!some) {
-        this.videos.push(chan)
-      }
-    }
-    console.log(this.videos)
-  }
-
 }

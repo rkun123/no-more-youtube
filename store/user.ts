@@ -180,11 +180,13 @@ export default class Users extends VuexModule {
   // eslint-disable-next-line require-await
   @Action({ rawError: true })
   auth () {
-    firebase.auth().onAuthStateChanged(async (currentUser) => {
+    const unsubscribe = firebase.auth().onAuthStateChanged(async (currentUser) => {
       if (currentUser === null) {
         console.info('ReLogging in...')
+        unsubscribe()
         await this.login()
       } else {
+        console.info('Already logged in...')
         const user: User = {
           uid: currentUser.uid,
           userName: currentUser.displayName,
@@ -195,23 +197,24 @@ export default class Users extends VuexModule {
         this.set(user)
         await this.fetchAccessToken(user.uid!)
       }
+      console.info('Auth completed')
       // Firestoreの制限時間，現在の再生時間を取得する．
       await this.fetchUserTimeLimitations(this.user.uid!)
 
+      await this.postUser()
+
       // 認証完了
 
-      await this.init()
+      await this.initAfterAuth()
     })
   }
 
   // 認証完了時(this.user格納完了後)に呼び出されるアクション
   @Action({ rawError: true})
-  async init() {
+  async initAfterAuth() {
     console.info('init...')
     // 自分の登録チャンネルを取得
     await ChannelsStore.fetchSubscriptions()
-
-    await this.postUser()
   }
 }
 // コンポーネントでの使い方
