@@ -2,10 +2,10 @@
     <div class="container">
         <div class="bar-outer">
             <div class="played-bar" :style="playedBarWidth">
-                <div class="played-time-label">
-                    <span class="played-time-title">本日の残り時間: </span>
-                    <span class="played-time-main" :style="isTimeExceeded ? 'color: red;' : ''">{{ this.currentPlayTime}}</span>
-                </div>
+            </div>
+            <div class="played-time-label">
+                <span class="played-time-title">本日の残り時間: </span>
+                <span class="played-time-main" :style="isTimeExceeded ? 'color: red;' : ''">{{ this.currentPlayTime}}</span>
             </div>
         </div>
     </div>
