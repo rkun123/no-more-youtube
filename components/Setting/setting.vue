@@ -103,7 +103,6 @@ export default Vue.extend({
   width: 400px;
 }
 .contents {
-  z-index: 10;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -124,6 +123,7 @@ export default Vue.extend({
   line-height: 30px;
 }
 .pict {
+  z-index: 10;
   margin-left: 10px;
   margin-right: 10px;
   cursor: pointer;
