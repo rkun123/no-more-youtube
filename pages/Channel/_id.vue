@@ -34,9 +34,12 @@ export default Vue.extend({
       return target
     },
     get_videos () {
-      const data = this.get_channels
-      if (data === undefined) { return }
-      return data.videos
+      const channeis = ChannelsStore.getchannels
+      const target = channeis.find((search) => {
+        return search.youtubeChannelId === this.$route.params.id
+      })
+      if (target === undefined) { return }
+      return target.videos
     }
   }
 })
