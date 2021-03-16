@@ -127,18 +127,20 @@ export default class Channels extends VuexModule {
 
   // Firestoreへ指定のChannelのFavoを送り更新するAction
   @Action({ rawError: true})
-  async postFavoState(youtubeChannelId: string, state: boolean) {
+  async postFavoState(payload: favoPayload) {
+    console.info('postFavoState', payload.youtubeChannelId, payload.favorite);
     (await getSubscriptionCollection())!
-      .doc(youtubeChannelId)
+      .doc(payload.youtubeChannelId)
       .update({
-        favorite: state
+        favorite: payload.favorite
       })
   }
 
   @Action({ rawError: true })
   async setFavo (payload: favoPayload) {
+    console.info('setFavo', payload)
     this.changeFavo(payload)
-    await this.postFavoState(payload.youtubeChannelId, payload.favorite)
+    await this.postFavoState(payload)
   }
 
   // Firestoreから自分の登録チャンネルを取得し、Storeに格納するアクション

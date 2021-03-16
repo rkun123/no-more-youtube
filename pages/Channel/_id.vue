@@ -66,6 +66,9 @@ export default Vue.extend({
   margin-top: 20px;
   font-size: 25px;
 }
+.fav {
+  color: #DA1725;
+}
 .videos {
   margin: auto;
   padding: 5px;
