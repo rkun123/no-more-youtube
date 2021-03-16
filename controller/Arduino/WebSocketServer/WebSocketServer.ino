@@ -18,6 +18,7 @@ WiFiMulti WiFiMulti;
 WebSocketsServer webSocket = WebSocketsServer(81);
 
 bool connecting = false;
+float startDeg;
 
 void hexdump(const void *mem, uint32_t len, uint8_t cols = 16) {
 	const uint8_t* src = (const uint8_t*) mem;
@@ -36,12 +37,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
     switch(type) {
         case WStype_DISCONNECTED:
-            M5.Lcd.printf("[%u] Disconnected!\n", num);
+            M5.Lcd.clear();
+            M5.Lcd.setCursor(10,85);
+            M5.Lcd.printf("GoodBye!");
+            connecting = false;
             break;
         case WStype_CONNECTED:
             {
                 IPAddress ip = webSocket.remoteIP(num);
-                M5.Lcd.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
                 calcGyroOffsets();
 
 				// send message to client
@@ -78,13 +81,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
 void calcGyroOffsets() 
 {
-  M5.Lcd.print("Dont move");
+  M5.Lcd.clear();
+  M5.Lcd.setCursor(10,95);
+  M5.Lcd.setTextSize(5);
+  M5.Lcd.printf("Dont Move!");
   mpu6050.begin();
   mpu6050.calcGyroOffsets(true);
-  M5.Lcd.print("OK");
-  M5.Lcd.setTextFont(2);
-  M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
-  M5.Lcd.println("M5Stack Balance Mode start");
+  startDeg = mpu6050.getAngleZ();
   connecting = true;
   M5.Lcd.clear();
 }
@@ -128,9 +131,9 @@ void loop() {
       float nowZGyro = mpu6050.getAngleZ();
       unsigned long nowTime = millis();
       float setspeed = fabsf((setZGyro-nowZGyro)/(nowTime-startTime))*2; /* かける値は要変更 */
-      M5.Lcd.setTextSize(5);
-      M5.Lcd.setCursor(0,0);
-      M5.Lcd.printf("%4.3f",setspeed );M5.Lcd.print(" x");
+      M5.Lcd.setTextSize(6);
+      M5.Lcd.setCursor(50,90);
+      M5.Lcd.printf("%3.2f",setspeed );M5.Lcd.print(" x");
       String ZGyro = String(int(nowZGyro));
       String Speed = String(setspeed);
       String payload = ZGyro + "," + Speed;
