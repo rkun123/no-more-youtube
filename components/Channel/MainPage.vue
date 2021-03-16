@@ -36,18 +36,12 @@ export default Vue.extend({
     async Favo () {
       // eslint-disable-next-line vue/no-mutating-props
       this.$emit('input', true)
-      await ChannelsStore.setFavo({
-        youtubeChannelId: this.list.youtubeChannelId!,
-        favorite: true
-      })
+      await ChannelsStore.setFavorite( true, this.list.youtubeChannelId)
     },
     async disFavo () {
       // eslint-disable-next-line vue/no-mutating-props
       this.$emit('input', false)
-      await ChannelsStore.setFavo({
-        youtubeChannelId: this.list.youtubeChannelId!,
-        favorite: false
-      })
+      await ChannelsStore.setFavorite( true, this.list.youtubeChannelId)
     },
     moveChannel (id: string) {
       this.$router.push({ path: '/channel/' + id })
