@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="root">
     <div>
       <h1 class="title">
         brachio-cup-youtube
@@ -40,7 +40,7 @@ export default Vue.extend({
   padding-top: 15px;
 }
 
-.container{
+.root{
   display: flex;
   justify-content: center;
   align-items: center;

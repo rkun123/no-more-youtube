@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="root">
         <div class="bar-outer">
             <div class="played-bar" :style="playedBarWidth">
             </div>
@@ -31,7 +31,7 @@ export default Vue.extend({
 })
 </script>
 <style scoped>
-.container {
+.root {
     width: 100%;
     margin-right: 10px;
 }
