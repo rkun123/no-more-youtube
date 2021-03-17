@@ -9,7 +9,7 @@ export async function fetchVideosByChannelFromAPI (channelId: string): Promise<V
     part: 'snippet',
     channelId,
     type: 'video',
-    maxResults: 11, // 本番環境では50にする。
+    maxResults: 6, // 本番環境では50にする。
     order: 'date',
     key: String(process.env.YOUTUBE_API_KEY)
   }

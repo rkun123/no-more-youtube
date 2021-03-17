@@ -80,7 +80,7 @@ async function fetchSubscriptionsFromAPI () {
   const params = {
     part: 'snippet',
     mine: true,
-    maxResults: 2, // 本番環境では50にする。
+    maxResults: 10, // 本番環境では50にする。
     key: String(process.env.YOUTUBE_API_KEY)
   }
   const result = await $axios
