@@ -14,6 +14,8 @@
 #include <MPU6050_tockn.h>
 MPU6050 mpu6050(Wire);
 
+#define GPIO_PIN 25
+
 WiFiMulti WiFiMulti;
 WebSocketsServer webSocket = WebSocketsServer(81);
 
@@ -85,9 +87,22 @@ void calcGyroOffsets()
   M5.Lcd.setCursor(10,95);
   M5.Lcd.setTextSize(5);
   M5.Lcd.printf("Dont Move!");
+  M5.Speaker.tone(1318.510, 200);
+  delay (400);
+  M5.Speaker.mute();
+  delay (400);
+  M5.Speaker.tone(1318.510, 200);
+  delay (400);
+  M5.Speaker.mute();
+  delay (400);
+  M5.Speaker.tone(1318.510, 200);
+  delay (400);
+  M5.Speaker.mute();
+  delay (400);
+  M5.Speaker.tone(1318.510);
   mpu6050.begin();
   mpu6050.calcGyroOffsets(true);
-  startDeg = mpu6050.getAngleZ();
+  M5.Speaker.mute();
   connecting = true;
   M5.Lcd.clear();
 }
@@ -96,7 +111,9 @@ void setup() {
   // Power ON Stabilizing...
     delay(500);
     M5.begin();
-
+    M5.Speaker.begin();
+    M5.Speaker.setVolume(3);
+    
     Wire.begin();
     Wire.setClock(400000UL);
 
