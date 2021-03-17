@@ -81,8 +81,6 @@ export default Vue.extend({
   margin-left: 12px;
   margin-top: 15px;
   font-size: 20px;
-}
-.channel .not-fav:hover {
   cursor: pointer;
 }
 .channel .fav {
