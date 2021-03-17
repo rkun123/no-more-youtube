@@ -18,7 +18,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'brachio-cup-youtube',
+    title: 'no-more-youtube',
     htmlAttrs: {
       lang: 'en'
     },

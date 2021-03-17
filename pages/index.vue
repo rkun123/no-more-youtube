@@ -1,9 +1,15 @@
 <template>
   <div class="root">
     <div>
-      <h1 class="title">
-        brachio-cup-youtube
-      </h1>
+      <div class="title-container">
+        <img :src="require('~/assets/m5stack.png')" class="logo">
+        <h1 class="title">
+        no-more-youtube
+        </h1>
+      </div>
+      <p class="msg">
+        あなたの時間を溶かさないYouTubeプレイヤー
+      </p>
       <controller-setting class="setting"/>
     </div>
   </div>
@@ -21,11 +27,23 @@ export default Vue.extend({
 })
 </script>
 <style scoped>
-.title {
-  display: block;
-  font-weight: 300;
-  color: #35495e;
-  letter-spacing: 1px;
+.title-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 4em;
+  margin-top: 2em;
+  margin-bottom: .5em;
+}
+.msg {
+  text-align: center;
+  margin-bottom: 2em;
+  background-color: none;
+}
+.logo {
+  width: 1em;
+  height: auto;
+  margin-right: .5em;
 }
 
 .subtitle {
