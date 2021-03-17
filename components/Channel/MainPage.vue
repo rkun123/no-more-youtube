@@ -78,7 +78,7 @@ export default Vue.extend({
   border-radius: 50%;
 }
 .channel .heart {
-  margin-left: 1em;
+  margin-left: 12px;
   margin-top: 15px;
   font-size: 20px;
 }
@@ -89,7 +89,7 @@ export default Vue.extend({
   color: #DA1725;
 }
 .channel .fav:hover{
-  margin-left: 7.5px;
+  margin-left: 9px;
   margin-top: 12.5px;
   font-size: 25px;
 }
