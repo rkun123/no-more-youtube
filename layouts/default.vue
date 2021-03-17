@@ -7,6 +7,7 @@
     <transition name="fade">
       <authentication-pending-cover v-if="isAuthPending" class="pending-cover has-background-dark" />
     </transition>
+    <play-time-exceeded-cover v-if="isPlayTimeExceeded"/>
   </div>
 </template>
 
@@ -15,15 +16,21 @@ import Vue from 'vue'
 import { UserStore, UIStore } from '~/store'
 import Navbar from '~/components/Navbar.vue'
 import AuthenticationPendingCover from '~/components/UI/AuthenticationPendingCover.vue'
+import PlayTimeExceededCover from '~/components/UI/PlayTimeExceededCover.vue'
 
 export default Vue.extend({
   components: {
     Navbar,
-    AuthenticationPendingCover
+    AuthenticationPendingCover,
+    PlayTimeExceededCover
   },
   computed: {
     isAuthPending () {
       return UIStore.getAuthPending
+    },
+    isPlayTimeExceeded () {
+      console.info('getIsRemainPlayTime', UserStore.getIsRemainPlayTime)
+      return !UserStore.getIsRemainPlayTime
     }
   },
   async created () {
