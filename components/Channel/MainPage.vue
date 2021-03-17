@@ -98,6 +98,10 @@ export default Vue.extend({
   white-space: nowrap;
   padding: 5px;
   display: flex;
+  scrollbar-width: none;
+}
+.videos::-webkit-scrollbar {
+  display: none;
 }
 .videos .video-card{
   margin: 5px;
