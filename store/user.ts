@@ -44,7 +44,7 @@ export default class Users extends VuexModule {
 
   public get getIsRemainPlayTime() {
     console.info('check getIsRemainPlayTime')
-    if(this.user.latestPlayedMinutesUpdatedAt === undefined) return false
+    if(this.user.latestPlayedMinutesUpdatedAt === undefined) return true
     if(this.getPlayedTimePercent > 100) {
     // 前回の更新が今日の場合，視聴可能時間を超過していたらfalseを返す．
       console.info('Play minutes exceeded!!!')
